@@ -39,7 +39,10 @@ class Handler (threading.Thread): # conserve un lien avec le client
                 if not RequeteDuClient: # si on ne recoit plus rien
                     print(("L'address {} vient de se déconnecter!").format(self.address))
                     break  # on break la boucle (sinon les bips vont se repeter)
-                exec(RequeteDuClient.decode())# affiche les donnees
+                try:
+                    exec(RequeteDuClient.decode())# affiche les donnees
+                except:
+                    print("LOG: Commande rendeignée par {} impossible " .format(self.address))
             except:
                 print("Le client {} s'est déconnecté".format(self.address))
                 break
