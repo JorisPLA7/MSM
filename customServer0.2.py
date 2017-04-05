@@ -4,6 +4,8 @@
 import socket
 import threading
 
+print("coucou c'est Arthur ! ")
+
 Sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 Host = '127.0.0.1' # l'ip locale de l'ordinateur
 Port = 8082 # choix d'un port
