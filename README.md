@@ -2,5 +2,5 @@
 Most Secure Messaging
 
 fonctionnalités à ajouter
-  authentification des clients
+  liste clients
   échange bilatéral

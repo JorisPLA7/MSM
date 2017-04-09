@@ -24,7 +24,7 @@ class Listener (threading.Thread):
             # Le script se stoppe ici jusqu'a ce qu'il y ait connexion :
             client, address = Sock.accept() # accepte les connexions de l'exterieur
             HandlerThread = Handler(i, client, address)
-            HandlerThread.start()
+            HandlerThread.
             i+=1
 class Handler (threading.Thread): # conserve un lien avec le client
     def __init__(self, threadID, client, address):

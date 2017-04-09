@@ -27,21 +27,27 @@ class Net ():
 
     def WhoAmI(self):
         return self.Nickname
-    
-def login(): 
+
+def login():
     ##phase de login
     Host = "0"
     if Host == "0":
             Host ="127.0.0.1"
     Port = 8082
-    Nickname = "coucoué"
+    Nickname = str(input("saisir un pseudo"))
     Pass = "lol ;')"
 
     MyNet = Net(Host, Port , Nickname, Pass)
     MyNet.Authenticate()
-    MyNet.SendMsg('print("couocu")')
     print(MyNet.WhoAmI())
     a = input()
+    """
+    data = self.Client.recv(64) # on recoit x caracteres grand max
+    RequeteDuClient = data.decode()
+    RequeteDuClient = str(object=RequeteDuClient)
+    print(RequeteDuClient)
+    a = input()
+"""
 
 while 1 :
     login()
