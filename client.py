@@ -2,6 +2,8 @@
 # -∗- coding: utf-8 -∗-
 import socket # on importe le module
 import threading
+import time
+
 
 global Sock
 class Net ():
@@ -39,6 +41,8 @@ def login():
 
     MyNet = Net(Host, Port , Nickname, Pass)
     MyNet.Authenticate()
+    time.sleep(1) #will sleep for 5 seconds
+    MyNet.SendMsg("ça croustille")
     print(MyNet.WhoAmI())
     a = input()
     """

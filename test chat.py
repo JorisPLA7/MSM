@@ -13,12 +13,12 @@ B="Arthur"
 bb="C'est toi le noob !"
 
 if test==1:
-    nuser1 = LabelFrame(fenetre3, text=A) 
+    nuser1 = LabelFrame(fenetre3, text=A)
     nuser1.pack()
     tuser1 = Label(nuser1, text=aa)
     tuser1.pack()
 if test==2:
-    nuser2 = LabelFrame(fenetre3, text=B) 
+    nuser2 = LabelFrame(fenetre3, text=B)
     nuser2.pack()
     tuser2 = Label(nuser2, text=bb)
     tuser2.pack()
@@ -28,14 +28,14 @@ if test==2:
 def envoie(event):
     global zchat
     aa=zchat.get()
-    nuser1 = LabelFrame(fenetre3, text=A) 
+    nuser1 = LabelFrame(fenetre3, text=A)
     nuser1.pack()
     tuser1 = Label(nuser1, text=aa)
     tuser1.pack()
     zchat.destroy()
     zchat = Entry(chat)
     zchat.pack(side=LEFT, fill=Y)
-    
+
 fenetre3.bind("<Return>", envoie)
 
 

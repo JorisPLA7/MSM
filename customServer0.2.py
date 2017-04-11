@@ -30,7 +30,7 @@ class ServerNet():
     def ListClients(self):
         return self.ReceptionistThread.ListClients()
 
-class Guest :
+class Guest(threading.Thread) :
     '''Classe de gestion de Client pas le serveur client par client.
     '''
     def __init__(self, SessionID, Client, Address):
@@ -48,21 +48,21 @@ class Guest :
         self.HandlerThread.start()
         self.IsAuth = 1
 
-    def run(self):
-        while not self.Authenticated:
-            data = self.Client.recv(32) # on recoit x caracteres grand max
-            RequeteDuClient = data.decode()
-            RequeteDuClient = str(object=RequeteDuClient)
-            print(RequeteDuClient)
-            print(type(RequeteDuClient))
-            print(RequeteDuClient[0:3])
-            if RequeteDuClient[0:3] == 'AUT':
-                NickLen = int(RequeteDuClient[3])
-                if verbose : print("Nicklen = {}".format(NickLen))
-                self.Nickname = RequeteDuClient[4:4+NickLen]
-                self.Authenticated = True
-                if verbose : print("Client {} authentifié \naddresse : {}".format(self.Nickname, self.Address))
 
+    def Listen(self,value):
+        while value == 1:
+            try:
+                RequeteDuClient = self.Client.recv(1024).decode() # on recoit 255 caracteres grand max
+                if not RequeteDuClient: # si on ne recoit plus rien
+                    if verbose : print(("L'adresse {} vient de se déconnecter!").format(self.Address))
+                    break  # on break la boucle (sinon les bips vont se repeter)
+                try:
+                    exec(RequeteDuClient)# affiche les donnees
+                except:
+                    print("LOG: Commande rendeignée par {} impossible ('{}')" .format(self.Address, RequeteDuClient))
+            except:
+                print("Le Client {} s'est déconnecté".format(self.Address))
+                break
 
 class Receptionist (threading.Thread):
     ''' Classe de threading chargée de récéptionner les conncetions des clients.
@@ -84,6 +84,7 @@ class Receptionist (threading.Thread):
             Client, Address = Sock.accept() # accepte les connexions de l'exterieur
             MyClient.insert(i,Guest(i, Client, Address))
             MyClient[i].Handle()
+            MyClient[i].Listen(1)
             i+=1
 
         #return self.ClientList

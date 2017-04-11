@@ -8,7 +8,7 @@ def save():
     f=jour.get()
     g=mois.get()
     h=année.get()
-    
+
 inscription = Tk()
 inscription.wm_title("MSM (inscription)")
 ##pseudo
