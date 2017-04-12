@@ -39,8 +39,9 @@ def login():
     Port = 8082
     Nickname = str(input("saisir un pseudo"))
     Pass = "lol ;')"
-
+    global MyNet
     MyNet = Net(Host, Port , Nickname, Pass)
+
     MyNet.Authenticate()
     MyNet.SendMsg("ça croustille")
     print(MyNet.WhoAmI())

@@ -2,7 +2,7 @@
 
 import socket
 import threading
-
+import time
 verbose = 0
 Sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 Host = '127.0.0.1' # l'ip locale de l'ordinateur
@@ -29,6 +29,7 @@ class ServerNet():
 
     def ListClients(self):
         return self.ReceptionistThread.ListClients()
+        #fClientList.insert(SessionID, self.Nickname, self.Address)
 
 class Guest(threading.Thread) :
     '''Classe de gestion de Client pas le serveur client par client.
@@ -43,11 +44,11 @@ class Guest(threading.Thread) :
         self.HandlerThread = 0
         self.IsAuth = 0
 
+
     def Handle(self):
         self.HandlerThread = Handler(self.SessionID, self.Client, self.Client)
         self.HandlerThread.start()
         self.IsAuth = 1
-
 
     def Listen(self,value):
         while value == 1:
@@ -73,7 +74,8 @@ class Receptionist (threading.Thread):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.name = name
-        self.ClientList = {}
+        global ClientList
+        ClientList = {}
         self.HandlerThread = {}
 
     def run(self):
@@ -83,11 +85,13 @@ class Receptionist (threading.Thread):
             # Le script se stoppe ici jusqu'a ce qu'il y ait connexion :
             Client, Address = Sock.accept() # accepte les connexions de l'exterieur
             MyClient.insert(i,Guest(i, Client, Address))
+
             MyClient[i].Handle()
             MyClient[i].Listen(1)
             i+=1
 
-        #return self.ClientList
+    def ListClients():
+        return self.MyClient
 
 
 class Handler (threading.Thread): # conserve un lien avec le Client
@@ -136,11 +140,12 @@ print("En attente de clients...")
 
 
 while 1 :
+    """
     try :
         exec(input(">>>"))
     except:
         pass
-
+    """
 
 '''    if not RequeteDuClient: # si on ne recoit plus rien
         print(("L'Address {} vient de se déconnecter!").format(self.Address))
