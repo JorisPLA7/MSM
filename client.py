@@ -24,6 +24,7 @@ class Net ():
         print("Disconnected", sep=' ')
 
     def SendMsg(self, msg):
+        time.sleep(1) #afin de donner le temps au serv d'être en écoute
         data = bytes(msg, 'utf8') # on rentre des donnees
         self.Sock.send(data) # on envoie ces donnees
 
@@ -41,7 +42,6 @@ def login():
 
     MyNet = Net(Host, Port , Nickname, Pass)
     MyNet.Authenticate()
-    time.sleep(1) #will sleep for 5 seconds
     MyNet.SendMsg("ça croustille")
     print(MyNet.WhoAmI())
     a = input()
@@ -55,5 +55,11 @@ def login():
 
 while 1 :
     login()
+
+    while 1 :
+        try :
+            exec(input(">>>"))
+        except:
+            pass
 
 # On est connecte, on fait une boucle infinie d'inputs pour l'envoi des messages :
