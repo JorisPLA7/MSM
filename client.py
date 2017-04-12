@@ -4,7 +4,6 @@ import socket # on importe le module
 import threading
 import time
 
-
 global Sock
 class Net ():
     def __init__(self,Host, Port, Nickname, Pass):
@@ -31,6 +30,9 @@ class Net ():
     def WhoAmI(self):
         return self.Nickname
 
+    def ListRooms(self):
+        return (salle1, salle2, salle3)
+
 def login():
     ##phase de login
     Host = "0"
@@ -40,6 +42,7 @@ def login():
     Nickname = str(input("saisir un pseudo"))
     Pass = "lol ;')"
     global MyNet
+
     MyNet = Net(Host, Port , Nickname, Pass)
 
     MyNet.Authenticate()
@@ -56,11 +59,5 @@ def login():
 
 while 1 :
     login()
-
-    while 1 :
-        try :
-            exec(input(">>>"))
-        except:
-            pass
 
 # On est connecte, on fait une boucle infinie d'inputs pour l'envoi des messages :

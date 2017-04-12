@@ -10,6 +10,8 @@ Port = 8082 # choix d'un port
 
 MyClient = []
 global Client
+global ClientList
+ClientList = []
 
 # on bind notre socket :
 Sock.bind((Host,Port))
@@ -17,7 +19,7 @@ Sock.bind((Host,Port))
 class ServerNet():
     def __init__(self):
         self.ReceptionistThread = Receptionist(1, "ReceptionistThread")
-        self.ClientList = {}
+
 
     def Listen(self,Toogler):
         if Toogler == True:
@@ -26,10 +28,9 @@ class ServerNet():
         #if Toogler == False:
             #self.ReceptionistThread.Stop() #non fonctionnel
 
-
     def ListClients(self):
         return self.ReceptionistThread.ListClients()
-        #fClientList.insert(SessionID, self.Nickname, self.Address)
+        return ClientList.insert(SessionID, self.Nickname, self.Address)
 
 class Guest(threading.Thread) :
     '''Classe de gestion de Client pas le serveur client par client.
@@ -43,7 +44,6 @@ class Guest(threading.Thread) :
         self.NickLen = None
         self.HandlerThread = 0
         self.IsAuth = 0
-
 
     def Handle(self):
         self.HandlerThread = Handler(self.SessionID, self.Client, self.Client)
@@ -74,8 +74,6 @@ class Receptionist (threading.Thread):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.name = name
-        global ClientList
-        ClientList = {}
         self.HandlerThread = {}
 
     def run(self):
@@ -92,7 +90,6 @@ class Receptionist (threading.Thread):
 
     def ListClients():
         return self.MyClient
-
 
 class Handler (threading.Thread): # conserve un lien avec le Client
     '''Classede threading d'appréhension du Client en attendant authentification.
@@ -118,6 +115,9 @@ class Handler (threading.Thread): # conserve un lien avec le Client
                 if verbose : print("Nicklen = {}".format(NickLen))
                 self.Nickname = RequeteDuClient[4:4+NickLen]
                 self.Authenticated = True
+                me = (self.Nickname, self.Address)
+                ClientList.insert(self.threadID, me)
+                print("List clients : {}".format(ClientList))
                 print("Client {} authentifié !".format(self.Nickname))
 
         while 1:
@@ -138,14 +138,13 @@ MyServ = ServerNet()
 MyServ.Listen(True)
 print("En attente de clients...")
 
-
 while 1 :
-    """
+
     try :
         exec(input(">>>"))
     except:
         pass
-    """
+
 
 '''    if not RequeteDuClient: # si on ne recoit plus rien
         print(("L'Address {} vient de se déconnecter!").format(self.Address))
