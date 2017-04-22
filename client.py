@@ -15,7 +15,7 @@ class Net ():
         self.Sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM) # on cree notre socket
 
     def Authenticate(self):
-        data = bytes("AUT" + self.NickLen + self.Nickname, 'utf8')
+        data = bytes("AUTH" + self.NickLen + self.Nickname, 'utf8')
         self.Sock.connect((self.Host,self.Port)) # on se connecte sur le serveur avec les informations données
         self.Sock.send(data)
 
@@ -27,6 +27,8 @@ class Net ():
         data = bytes(msg, 'utf8') # on rentre des donnees
         self.Sock.send(data) # on envoie ces donnees
 
+    def Execute(self):
+        pass
     def WhoAmI(self):
         return self.Nickname
 

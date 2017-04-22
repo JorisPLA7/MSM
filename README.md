@@ -6,3 +6,10 @@ fonctionnalités à ajouter
   échange bilatéral
 
 print(MyServ.ListClients())
+
+préfixes comm:
+  AUTH authentification
+  BROA broadcast
+  EXEC Execute
+  MNGE manage utilisateur
+  
