@@ -28,10 +28,6 @@ class ServerNet():
         #if Toogler == False:
             #self.ReceptionistThread.Stop() #non fonctionnel
 
-    def ListClients(self):
-        return self.ReceptionistThread.ListClients()
-        return ClientList.insert(SessionID, self.Nickname, self.Address)
-
 class Guest(threading.Thread) :
     '''Classe de gestion de Client pas le serveur client par client.
     '''
@@ -60,7 +56,7 @@ class Guest(threading.Thread) :
                 try:
                     exec(RequeteDuClient)# affiche les donnees
                 except:
-                    print("LOG: Commande rendeignée par {} impossible ('{}')" .format(self.Address, RequeteDuClient))
+                    print("------------------{} ('{}')" .format(self.Address, RequeteDuClient))
             except:
                 print("Le Client {} s'est déconnecté".format(self.Address))
                 break
@@ -88,8 +84,6 @@ class Receptionist (threading.Thread):
             MyClient[i].Listen(1)
             i+=1
 
-    def ListClients():
-        return self.MyClient
 
 class Handler (threading.Thread): # conserve un lien avec le Client
     '''Classede threading d'appréhension du Client en attendant authentification.
@@ -103,19 +97,20 @@ class Handler (threading.Thread): # conserve un lien avec le Client
         self.Nickname = None
         self.NickLen = None
 
+
     def run(self):
         while not self.Authenticated :
             data = self.Client.recv(32) # on recoit x caracteres grand max
             RequeteDuClient = data.decode()
             RequeteDuClient = str(object=RequeteDuClient)
             if verbose : print("RequeteDuClient : '{}'".format(RequeteDuClient))
-            print(RequeteDuClient[0:3])
-            if RequeteDuClient[0:3] == 'AUT':
-                NickLen = int(RequeteDuClient[3])
+            print(RequeteDuClient[0:4])
+            if RequeteDuClient[0:4] == 'AUTH':
+                NickLen = int(RequeteDuClient[4])
                 if verbose : print("Nicklen = {}".format(NickLen))
-                self.Nickname = RequeteDuClient[4:4+NickLen]
+                self.Nickname = RequeteDuClient[5:5+NickLen]
                 self.Authenticated = True
-                me = (self.Nickname, self.Address)
+                me = (self.Nickname, self.Client)
                 ClientList.insert(self.threadID, me)
                 print("List clients : {}".format(ClientList))
                 print("Client {} authentifié !".format(self.Nickname))
@@ -150,6 +145,4 @@ while 1 :
         print(("L'Address {} vient de se déconnecter!").format(self.Address))
         break  # on break la boucle (sinon les bips vont se repeter)
         print(("L'Address {} vient de se connecter au serveur !").format(self.Address))
-
-
 '''
