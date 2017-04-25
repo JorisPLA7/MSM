@@ -3,6 +3,8 @@
 import socket
 import threading
 import time
+from threading import Thread
+
 verbose = 0
 Sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 Host = '127.0.0.1' # l'ip locale de l'ordinateur
@@ -88,11 +90,11 @@ class Receptionist (threading.Thread):
     def run(self):
         i = 0 # i : thread counter
         while 1:# On est a l'ecoute d'une seule et unique connexion à la fois :
-            Sock.listen(10)
+            Sock.listen(5)
             # Le script se stoppe ici jusqu'a ce qu'il y ait connexion :
             Client, Address = Sock.accept() # accepte les connexions de l'exterieur
-            self.ReceptionistThread = Receptionist(1, "ReceptionistThread")
-            MyClient.insert(i,Guest(i, Client, Address))
+            t = Guest(i, Client, Address)
+            MyClient.insert(i, t)
             MyClient[i].start()
             MyClient[i].Handle()
             MyClient[i].Listen(1)
