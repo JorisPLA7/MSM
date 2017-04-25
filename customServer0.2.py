@@ -14,7 +14,8 @@ global MyClient
 MyClient = []
 global ClientList
 ClientList = {}
-
+global NicknameList
+NicknameList = []
 # on bind notre socket :
 Sock.bind((Host,Port))
 
@@ -70,7 +71,8 @@ class Guest(threading.Thread) :
                 self.Authenticated = True
                 me = (self.Client)
                 ClientList[self.Nickname]= (True,me) ## True, pour indiquer que le client est connecté
-                print("List clients : {}".format(ClientList))
+                NicknameList.append((time.asctime(),self.Nickname))
+                print("Historique des clients : {}".format(NicknameList))
                 print("Client {} authentifié !".format(self.Nickname))
 
     def Listen(self,value):
@@ -95,7 +97,7 @@ class Guest(threading.Thread) :
         except:
             print("impossible d'authentifier le client {}".format(self.Address))
 
-        self.Listen(1)
+        if self.Authenticated : self.Listen(1)
 
 
 
