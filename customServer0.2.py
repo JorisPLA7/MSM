@@ -47,19 +47,35 @@ class Guest(threading.Thread) :
         self.Nickname = None
         self.NickLen = None
         self.AuthenticationThread = 0
-        self.IsAuth = 0
+        self.Authenticated = 0
+        self.DoListen = 0
+
+
 
     def SetNickname(self, NewNick):
         self.Nickname = NewNick
         self.NickLen = len(self.Nickname)
 
-    def Handle(self):
-        self.AuthenticationThread = Authentication(self.GuestID, self.Client, self.Client)
-        self.AuthenticationThread.start()
-        self.IsAuth = 1
+    def GetAuth(self):
+        while not self.Authenticated :
+            data = self.Client.recv(32) # on recoit x caracteres grand max
+            RequeteDuClient = data.decode()
+            RequeteDuClient = str(object=RequeteDuClient)
+            if verbose : print("RequeteDuClient : '{}'".format(RequeteDuClient))
+            print(RequeteDuClient[0:4])
+            if RequeteDuClient[0:4] == 'AUTH':
+                ReceivedNickLen = int(RequeteDuClient[4])
+                if verbose : print("ReceivedNicklen = {}".format(ReceivedNickLen))
+                self.Nickname = RequeteDuClient[5:5+ReceivedNickLen]
+                self.Authenticated = True
+                me = (self.Client)
+                ClientList[self.Nickname]= (True,me) ## True, pour indiquer que le client est connecté
+                print("List clients : {}".format(ClientList))
+                print("Client {} authentifié !".format(self.Nickname))
 
     def Listen(self,value):
-        while value == 1:
+        self.DoListen = value
+        while self.DoListen == 1:
             try:
                 RequeteDuClient = self.Client.recv(1024).decode() # on recoit 255 caracteres grand max
                 if not RequeteDuClient: # si on ne recoit plus rien
@@ -73,6 +89,13 @@ class Guest(threading.Thread) :
                 print("Le Client {} ( {} ) s'est déconnecté !".format(self.Nickname, self.Address))
                 break
 
+    def run(self):
+        try:
+            self.GetAuth()
+        except:
+            print("impossible d'authentifier le client {}".format(self.Address))
+
+        self.Listen(1)
 
 
 
@@ -96,8 +119,6 @@ class Receptionist (threading.Thread):
             t = Guest(i, Client, Address)
             MyClient.insert(i, t)
             MyClient[i].start()
-            MyClient[i].Handle()
-            MyClient[i].Listen(1)
             i+=1
 
 
@@ -113,7 +134,7 @@ class Authentication (threading.Thread): # conserve un lien avec le Client
         self.Client = Client
         self.Address = Address
         self.Authenticated = False
-        self.ReceivedNickname = None
+        self.Nickname = None
         self.ReceivedNickLen = None
 
 
@@ -127,13 +148,13 @@ class Authentication (threading.Thread): # conserve un lien avec le Client
             if RequeteDuClient[0:4] == 'AUTH':
                 ReceivedNickLen = int(RequeteDuClient[4])
                 if verbose : print("ReceivedNicklen = {}".format(ReceivedNickLen))
-                self.ReceivedNickname = RequeteDuClient[5:5+ReceivedNickLen]
+                self.Nickname = RequeteDuClient[5:5+ReceivedNickLen]
                 self.Authenticated = True
                 me = (self.Client)
-                ClientList[self.ReceivedNickname]= (True,me) ## True, pour indiquer que le client est connecté
+                ClientList[self.Nickname]= (True,me) ## True, pour indiquer que le client est connecté
                 print("List clients : {}".format(ClientList))
-                print("Client {} authentifié !".format(self.ReceivedNickname))
-        MyClient[self.threadID].SetNickname(self.ReceivedNickname)
+                print("Client {} authentifié !".format(self.Nickname))
+        MyClient[self.threadID].SetNickname(self.Nickname)
 MyServ = ServerNet()
 MyServ.Listen(True)
 print("En attente de clients...")

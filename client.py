@@ -41,7 +41,7 @@ def login():
     if Host == "0":
             Host ="127.0.0.1"
     Port = 8082
-    Nickname = str(input("saisir un pseudo"))
+    Nickname = str(input("saisir un pseudo :  "))
     Pass = "lol ;')"
     global MyNet
 
