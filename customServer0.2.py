@@ -11,7 +11,7 @@ Port = 8082 # choix d'un port
 MyClient = []
 global Client
 global ClientList
-ClientList = []
+ClientList = {}
 
 # on bind notre socket :
 Sock.bind((Host,Port))
@@ -27,6 +27,7 @@ class ServerNet():
 
         #if Toogler == False:
             #self.ReceptionistThread.Stop() #non fonctionnel
+
 
 class Guest(threading.Thread) :
     '''Classe de gestion de Client pas le serveur client par client.
@@ -60,6 +61,7 @@ class Guest(threading.Thread) :
             except:
                 print("Le Client {} s'est déconnecté".format(self.Address))
                 break
+
 
 class Receptionist (threading.Thread):
     ''' Classe de threading chargée de récéptionner les conncetions des clients.
@@ -110,16 +112,17 @@ class Handler (threading.Thread): # conserve un lien avec le Client
                 if verbose : print("Nicklen = {}".format(NickLen))
                 self.Nickname = RequeteDuClient[5:5+NickLen]
                 self.Authenticated = True
-                me = (self.Nickname, self.Client)
-                ClientList.insert(self.threadID, me)
+                me = (self.Client)
+                ClientList[self.Nickname]= (True,me) ## True, pour indiquer que le client est connecté
                 print("List clients : {}".format(ClientList))
                 print("Client {} authentifié !".format(self.Nickname))
 
-        while 1:
+        '''while 1:
             try:
                 RequeteDuClient = self.Client.recv(1024) # on recoit 255 caracteres grand max
                 if not RequeteDuClient: # si on ne recoit plus rien
                     if verbose : print(("L'adresse {} vient de se déconnecter!").format(self.Address))
+                    ClientList[Self.Nickname]
                     break  # on break la boucle (sinon les bips vont se repeter)
                 try:
                     exec(RequeteDuClient.decode())# affiche les donnees
@@ -128,6 +131,7 @@ class Handler (threading.Thread): # conserve un lien avec le Client
             except:
                 print("Le Client {} s'est déconnecté".format(self.Address))
                 break
+        '''
 
 MyServ = ServerNet()
 MyServ.Listen(True)

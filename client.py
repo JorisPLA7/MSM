@@ -50,7 +50,10 @@ def login():
     MyNet.Authenticate()
     MyNet.SendMsg("ça croustille")
     print(MyNet.WhoAmI())
-    a = input()
+    while 1:
+        a = input()
+        MyNet.SendMsg(a)
+
     """
     data = self.Client.recv(64) # on recoit x caracteres grand max
     RequeteDuClient = data.decode()
