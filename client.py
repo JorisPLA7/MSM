@@ -48,10 +48,9 @@ def login():
     MyNet = Net(Host, Port , Nickname, Pass)
 
     MyNet.Authenticate()
-    MyNet.SendMsg("ça croustille")
-    print(MyNet.WhoAmI())
+    print("Vous êtes connecté en tant que {}".format(MyNet.WhoAmI()))
     while 1:
-        a = input()
+        a = input("{} :  ".format(Nickname))
         MyNet.SendMsg(a)
 
     """

@@ -8,8 +8,8 @@ Sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 Host = '127.0.0.1' # l'ip locale de l'ordinateur
 Port = 8082 # choix d'un port
 
+global MyClient
 MyClient = []
-global Client
 global ClientList
 ClientList = {}
 
@@ -17,7 +17,10 @@ ClientList = {}
 Sock.bind((Host,Port))
 
 class ServerNet():
-    def __init__(self):
+    '''Classe Serveur, sert d'interface entre certains threads et mes collègues
+    Joris Placette
+    '''
+    def __init__(self): #initiallisation du thread de reception des nouveaux clients
         self.ReceptionistThread = Receptionist(1, "ReceptionistThread")
 
 
@@ -25,26 +28,32 @@ class ServerNet():
         if Toogler == True:
             self.ReceptionistThread.start()
 
-        #if Toogler == False:
-            #self.ReceptionistThread.Stop() #non fonctionnel
+
+
 
 
 class Guest(threading.Thread) :
-    '''Classe de gestion de Client pas le serveur client par client.
+    '''Classe de gestion de Client individuellement.
+    Joris Placette
     '''
-    def __init__(self, SessionID, Client, Address):
-        self.SessionID = SessionID
+    def __init__(self, GuestID, Client, Address): #initiallisation des variables de l'objet nouvellement crée
+        threading.Thread.__init__(self)
+        self.GuestID = GuestID
         self.Client = Client
         self.Address = Address
         self.Authenticated = False
         self.Nickname = None
         self.NickLen = None
-        self.HandlerThread = 0
+        self.AuthenticationThread = 0
         self.IsAuth = 0
 
+    def SetNickname(self, NewNick):
+        self.Nickname = NewNick
+        self.NickLen = len(self.Nickname)
+
     def Handle(self):
-        self.HandlerThread = Handler(self.SessionID, self.Client, self.Client)
-        self.HandlerThread.start()
+        self.AuthenticationThread = Authentication(self.GuestID, self.Client, self.Client)
+        self.AuthenticationThread.start()
         self.IsAuth = 1
 
     def Listen(self,value):
@@ -57,10 +66,13 @@ class Guest(threading.Thread) :
                 try:
                     exec(RequeteDuClient)# affiche les donnees
                 except:
-                    print("------------------{} ('{}')" .format(self.Address, RequeteDuClient))
+                    print("------------------{} ({}) :  {}" .format(self.Nickname, self.Address, RequeteDuClient))
             except:
-                print("Le Client {} s'est déconnecté".format(self.Address))
+                print("Le Client {} ( {} ) s'est déconnecté !".format(self.Nickname, self.Address))
                 break
+
+
+
 
 
 class Receptionist (threading.Thread):
@@ -68,36 +80,39 @@ class Receptionist (threading.Thread):
     concue pour être invoquée en 1 exemplaire par la classe ServerNet.
     N'est pas prévue pour être manipulée par l'utilisateur.
     '''
-    def __init__(self, threadID, name):
+    def __init__(self, threadID, name): #initiallisation des variables de l'objet nouvellement crée
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.name = name
-        self.HandlerThread = {}
 
     def run(self):
         i = 0 # i : thread counter
         while 1:# On est a l'ecoute d'une seule et unique connexion à la fois :
-            Sock.listen(2)
+            Sock.listen(10)
             # Le script se stoppe ici jusqu'a ce qu'il y ait connexion :
             Client, Address = Sock.accept() # accepte les connexions de l'exterieur
+            self.ReceptionistThread = Receptionist(1, "ReceptionistThread")
             MyClient.insert(i,Guest(i, Client, Address))
-
+            MyClient[i].start()
             MyClient[i].Handle()
             MyClient[i].Listen(1)
             i+=1
 
 
-class Handler (threading.Thread): # conserve un lien avec le Client
+
+
+
+class Authentication (threading.Thread): # conserve un lien avec le Client
     '''Classede threading d'appréhension du Client en attendant authentification.
     '''
-    def __init__(self, threadID, Client, Address):
+    def __init__(self, threadID, Client, Address): #initiallisation des variables de l'objet nouvellement crée
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.Client = Client
         self.Address = Address
         self.Authenticated = False
-        self.Nickname = None
-        self.NickLen = None
+        self.ReceivedNickname = None
+        self.ReceivedNickLen = None
 
 
     def run(self):
@@ -108,31 +123,15 @@ class Handler (threading.Thread): # conserve un lien avec le Client
             if verbose : print("RequeteDuClient : '{}'".format(RequeteDuClient))
             print(RequeteDuClient[0:4])
             if RequeteDuClient[0:4] == 'AUTH':
-                NickLen = int(RequeteDuClient[4])
-                if verbose : print("Nicklen = {}".format(NickLen))
-                self.Nickname = RequeteDuClient[5:5+NickLen]
+                ReceivedNickLen = int(RequeteDuClient[4])
+                if verbose : print("ReceivedNicklen = {}".format(ReceivedNickLen))
+                self.ReceivedNickname = RequeteDuClient[5:5+ReceivedNickLen]
                 self.Authenticated = True
                 me = (self.Client)
-                ClientList[self.Nickname]= (True,me) ## True, pour indiquer que le client est connecté
+                ClientList[self.ReceivedNickname]= (True,me) ## True, pour indiquer que le client est connecté
                 print("List clients : {}".format(ClientList))
-                print("Client {} authentifié !".format(self.Nickname))
-
-        '''while 1:
-            try:
-                RequeteDuClient = self.Client.recv(1024) # on recoit 255 caracteres grand max
-                if not RequeteDuClient: # si on ne recoit plus rien
-                    if verbose : print(("L'adresse {} vient de se déconnecter!").format(self.Address))
-                    ClientList[Self.Nickname]
-                    break  # on break la boucle (sinon les bips vont se repeter)
-                try:
-                    exec(RequeteDuClient.decode())# affiche les donnees
-                except:
-                    print("LOG: Commande rendeignée par {} impossible ('{}')" .format(self.Address, RequeteDuClient))
-            except:
-                print("Le Client {} s'est déconnecté".format(self.Address))
-                break
-        '''
-
+                print("Client {} authentifié !".format(self.ReceivedNickname))
+        MyClient[self.threadID].SetNickname(self.ReceivedNickname)
 MyServ = ServerNet()
 MyServ.Listen(True)
 print("En attente de clients...")
@@ -140,13 +139,6 @@ print("En attente de clients...")
 while 1 :
 
     try :
-        exec(input(">>>"))
+        exec(input(">>>")) #sorte d'invite de commande en cas de lancement interactif sur le serveur
     except:
         pass
-
-
-'''    if not RequeteDuClient: # si on ne recoit plus rien
-        print(("L'Address {} vient de se déconnecter!").format(self.Address))
-        break  # on break la boucle (sinon les bips vont se repeter)
-        print(("L'Address {} vient de se connecter au serveur !").format(self.Address))
-'''
