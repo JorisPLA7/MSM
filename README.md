@@ -2,8 +2,8 @@
 Most Secure Messaging
 
 fonctionnalités à ajouter
-  liste clients & clients en tant qu'objet
   échange bilatéral
+  traitement séparé données reçues
 
 print(MyServ.ListClients())
 
@@ -12,4 +12,4 @@ préfixes comm:
   BROA broadcast
   EXEC Execute
   MNGE manage utilisateur
-  
+  MSGE

@@ -5,6 +5,16 @@ import threading
 import time
 
 global Sock
+class Receiver (threading.Thread) :
+    def __init__(self, Value):
+        self.DoListen = Value
+        self.ReceiverSock = socket.socket(socket.AF_INET,socket.SOCK_STREAM) # on cree notre socket
+        self.ReceiverSock.bind("127.0.0.1","8083")
+
+    def run(self):
+        if DoListen :
+            pass
+
 class Net ():
     def __init__(self,Host, Port, Nickname, Pass):
         self.Host = socket.gethostbyname(Host)
@@ -12,20 +22,30 @@ class Net ():
         self.Nickname = Nickname
         self.NickLen = str(len(self.Nickname))
         self.Pass = Pass
-        self.Sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM) # on cree notre socket
+        self.SenderSock = socket.socket(socket.AF_INET,socket.SOCK_STREAM) # on cree notre socket
+        self.Connected = False
 
     def Authenticate(self):
         data = bytes("AUTH" + self.NickLen + self.Nickname, 'utf8')
-        self.Sock.connect((self.Host,self.Port)) # on se connecte sur le serveur avec les informations données
-        self.Sock.send(data)
+        try:
+            self.SenderSock.connect((self.Host,self.Port)) # on se connecte sur le serveur avec les informations données
+            print("Connection avec le serveur...")
+            self.SenderSock.send(data)
+            print("Authentification auprès du serveur...")
+            self.Connected = True
+        except:
+            print("Impossible de se connecter au serveur !")
+            self.Connected = False
 
+    def Connected(self):
+        return self.Connected
     def Disconnect(self):
         print("Disconnected", sep=' ')
 
     def SendMsg(self, msg):
         time.sleep(1) #afin de donner le temps au serv d'être en écoute
         data = bytes(msg, 'utf8') # on rentre des donnees
-        self.Sock.send(data) # on envoie ces donnees
+        self.SenderSock.send(data) # on envoie ces donnees
 
     def Execute(self):
         pass
@@ -34,6 +54,7 @@ class Net ():
 
     def ListRooms(self):
         return (salle1, salle2, salle3)
+
 
 def login():
     ##phase de login
@@ -48,10 +69,11 @@ def login():
     MyNet = Net(Host, Port , Nickname, Pass)
 
     MyNet.Authenticate()
-    print("Vous êtes connecté en tant que {}".format(MyNet.WhoAmI()))
-    while 1:
-        a = input("{} :  ".format(Nickname))
-        MyNet.SendMsg(a)
+    if MyNet.Connected == True :
+        print("Vous êtes connecté en tant que {}".format(MyNet.WhoAmI()))
+        while True:
+            a = input("{} :  ".format(Nickname))
+            MyNet.SendMsg(a)
 
     """
     data = self.Client.recv(64) # on recoit x caracteres grand max

@@ -5,6 +5,7 @@ import threading
 import time
 from threading import Thread
 
+
 verbose = 0
 Sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 Host = '127.0.0.1' # l'ip locale de l'ordinateur
@@ -127,36 +128,7 @@ class Receptionist (threading.Thread):
 
 
 
-class Authentication (threading.Thread): # conserve un lien avec le Client
-    '''Classede threading d'appréhension du Client en attendant authentification.
-    '''
-    def __init__(self, threadID, Client, Address): #initiallisation des variables de l'objet nouvellement crée
-        threading.Thread.__init__(self)
-        self.threadID = threadID
-        self.Client = Client
-        self.Address = Address
-        self.Authenticated = False
-        self.Nickname = None
-        self.ReceivedNickLen = None
 
-
-    def run(self):
-        while not self.Authenticated :
-            data = self.Client.recv(32) # on recoit x caracteres grand max
-            RequeteDuClient = data.decode()
-            RequeteDuClient = str(object=RequeteDuClient)
-            if verbose : print("RequeteDuClient : '{}'".format(RequeteDuClient))
-            print(RequeteDuClient[0:4])
-            if RequeteDuClient[0:4] == 'AUTH':
-                ReceivedNickLen = int(RequeteDuClient[4])
-                if verbose : print("ReceivedNicklen = {}".format(ReceivedNickLen))
-                self.Nickname = RequeteDuClient[5:5+ReceivedNickLen]
-                self.Authenticated = True
-                me = (self.Client)
-                ClientList[self.Nickname]= (True,me) ## True, pour indiquer que le client est connecté
-                print("List clients : {}".format(ClientList))
-                print("Client {} authentifié !".format(self.Nickname))
-        MyClient[self.threadID].SetNickname(self.Nickname)
 MyServ = ServerNet()
 MyServ.Listen(True)
 print("En attente de clients...")
