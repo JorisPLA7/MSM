@@ -6,7 +6,7 @@ import time
 from threading import Thread
 
 
-verbose = 0
+verbose = 1
 Sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 Host = '127.0.0.1' # l'ip locale de l'ordinateur
 Port = 8082 # choix d'un port
@@ -79,20 +79,21 @@ class Guest(threading.Thread) :
     def Listen(self,value):
         self.DoListen = value
         while self.DoListen == 1:
-            try:
+            if 1:
+
                 RequeteDuClient = self.Client.recv(1024).decode() # on recoit 255 caracteres grand max
                 if not RequeteDuClient: # si on ne recoit plus rien
                     if verbose : print(("L'adresse {} vient de se déconnecter!").format(self.Address))
-                    break  # on break la boucle (sinon les bips vont se repeter)
+                    #self.Client.close()  # on break la boucle (sinon les bips vont se repeter)
                 try:
                     exec(RequeteDuClient)# affiche les donnees
                 except:
                     print("------------------{} ({}) :  {}" .format(self.Nickname, self.Address, RequeteDuClient))
                     time.sleep(1)
-                    data = bytes("coucou ! ça marche enfin", 'utf8') # on rentre des donnees
-                    .send(data)
-            except:
-                pass
+                data = bytes("coucou ! ça marche enfin", 'utf8') # on rentre des donnees
+                Sock.send(data)
+                if verbose == 1 : print("MESSAGE ENVOYE")
+
 
     def run(self):
         try:

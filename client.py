@@ -6,15 +6,36 @@ import time
 
 global Sock
 
+ #c'est temporaire, ojn va fixer ça ... désolé aux lecteurs fragiles
 Sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM) # on cree notre socket
 
 class Receiver (threading.Thread) :
     def __init__(self):
         threading.Thread.__init__(self)
         self.DoListen = 1
+        self.Message = False
+
+        print('init receiver Thread qui porte mal son nom')
+
+    def Queue(self, message):
+        self.Message = message
 
     def run(self):
-        print("ARCHTUNG CA FUNCTIONNIERT")
+        while 1:
+            if self.Message != False:
+                print('envoi...  {}'.format(self.Message))
+                data = bytes(self.Message, 'utf8') # on rentre des donnees
+                Sock.send(data) # on envoie ces donnees
+                self.Message = False
+
+            if self.DoListen =='a':
+                data = Sock.recv(1024).decode
+                if not data:
+                    Sock.close()
+                if data :
+                    print('-------serv: {}'.format(data))
+
+        '''print("ARCHTUNG CA FUNCTIONNIERT")
         while 1:
             Sock.listen()
             data = Sock.recv(1024).decode()
@@ -33,6 +54,7 @@ class Receiver (threading.Thread) :
             except:
                 print("Le serv {} ( {} ) n'est plus sous écoute!".format(self.Nickname, self.Address))
                 """break"""
+        '''
 
 
 class Net ():
@@ -67,8 +89,7 @@ class Net ():
         print("Disconnected", sep=' ')
 
     def SendMsg(self, msg):
-        data = bytes(msg, 'utf8') # on rentre des donnees
-        Sock.send(data) # on envoie ces donnees
+        self.Receiver.Queue(msg)
 
     def Execute(self):
         pass
