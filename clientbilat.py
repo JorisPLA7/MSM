@@ -5,35 +5,15 @@ import threading
 import time
 
 global Sock
-
-Sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM) # on cree notre socket
-
 class Receiver (threading.Thread) :
-    def __init__(self):
-        threading.Thread.__init__(self)
-        self.DoListen = 1
+    def __init__(self, Value):
+        self.DoListen = Value
+        self.ReceiverSock = socket.socket(socket.AF_INET,socket.SOCK_STREAM) # on cree notre socket
+        self.ReceiverSock.bind("127.0.0.1","8083")
 
     def run(self):
-        print("ARCHTUNG CA FUNCTIONNIERT")
-        while 1:
-            Sock.listen()
-            data = Sock.recv(1024).decode()
-            print("--------------serv : {}".format(data))
-
-        while self.DoListen == 1:
-            try:
-                RequeteDuServ = Sock.recv(1024).decode() # on recoit 255 caracteres grand max
-                if not RequeteDuServ: # si on ne recoit plus rien
-                    if verbose : print(("ecoute stopée").format(self.Address))
-                    break  # on break la boucle (sinon les bips vont se repeter)
-                try:
-                    exec(RequeteDuServ)# affiche les donnees
-                except:
-                    print("------------------ {}" .format(RequeteDuServ))
-            except:
-                print("Le serv {} ( {} ) n'est plus sous écoute!".format(self.Nickname, self.Address))
-                """break"""
-
+        if DoListen :
+            pass
 
 class Net ():
     def __init__(self,Host, Port, Nickname, Pass):
@@ -42,21 +22,17 @@ class Net ():
         self.Nickname = Nickname
         self.NickLen = str(len(self.Nickname))
         self.Pass = Pass
+        self.SenderSock = socket.socket(socket.AF_INET,socket.SOCK_STREAM) # on cree notre socket
         self.Connected = False
-        self.Receiver = Receiver()
-        self.Receiver.start()
 
     def Authenticate(self):
         data = bytes("AUTH" + self.NickLen + self.Nickname, 'utf8')
         try:
-            Sock.connect((self.Host,self.Port)) # on se connecte sur le serveur avec les informations données
+            self.SenderSock.connect((self.Host,self.Port)) # on se connecte sur le serveur avec les informations données
             print("Connection avec le serveur...")
-            Sock.send(data)
+            self.SenderSock.send(data)
             print("Authentification auprès du serveur...")
-            time.sleep(1) #afin de donner le temps au serv d'être en écoute
-
             self.Connected = True
-
         except:
             print("Impossible de se connecter au serveur !")
             self.Connected = False
@@ -67,8 +43,9 @@ class Net ():
         print("Disconnected", sep=' ')
 
     def SendMsg(self, msg):
+        time.sleep(1) #afin de donner le temps au serv d'être en écoute
         data = bytes(msg, 'utf8') # on rentre des donnees
-        Sock.send(data) # on envoie ces donnees
+        self.SenderSock.send(data) # on envoie ces donnees
 
     def Execute(self):
         pass

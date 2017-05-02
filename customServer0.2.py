@@ -88,9 +88,11 @@ class Guest(threading.Thread) :
                     exec(RequeteDuClient)# affiche les donnees
                 except:
                     print("------------------{} ({}) :  {}" .format(self.Nickname, self.Address, RequeteDuClient))
+                    time.sleep(1)
+                    data = bytes("coucou ! ça marche enfin", 'utf8') # on rentre des donnees
+                    .send(data)
             except:
-                print("Le Client {} ( {} ) s'est déconnecté !".format(self.Nickname, self.Address))
-                break
+                pass
 
     def run(self):
         try:
