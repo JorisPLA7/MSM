@@ -33,9 +33,6 @@ class ServerNet():
             self.ReceptionistThread.start()
 
 
-    def Broadcard(self,msg):
-        for i in (0,10):
-            MyClient[i].SendMsg(msg)
 
 
 
@@ -47,23 +44,22 @@ class Guest(threading.Thread) :
         threading.Thread.__init__(self)
         self.GuestID = GuestID
         self.Client = Client
+        self.Client.settimeout(2.0) #timeout crucial pour que le serv abandonne l'écoute toute les 2 secondes pour transmettre le(s) message(s)
         self.Address = Address
         self.Authenticated = False
         self.Nickname = None
         self.NickLen = None
         self.AuthenticationThread = 0
         self.Authenticated = 0
-        self.DoListen = 0
+        self.DoComm = 0
         self.Message = 0
+
 
 
     def SetNickname(self, NewNick):
         self.Nickname = NewNick
         self.NickLen = len(self.Nickname)
 
-    def SendMsg(self, msg) :
-        self.Message = msg
-        self.Comm()
     def GetAuth(self):
         while not self.Authenticated :
             data = self.Client.recv(32) # on recoit x caracteres grand max
@@ -82,18 +78,38 @@ class Guest(threading.Thread) :
                 print("Historique des clients : {}".format(NicknameList))
                 print("Client {} authentifié !".format(self.Nickname))
 
-    def Comm(self):
-        if self.Authenticated :
-            while 1:
-                if self.Message != 0:
-                    self.Client.send(self.Message.encode())
-                    self.Message = 0
+    def RequestTreatment(self, Request):
+        try:
+            exec(Request)# affiche les donnees
+        except:
+            print("------------------{} ({}) :  {}" .format(self.Nickname, self.Address, Request))
+
+    def Ship(self, msg):
+        self.Message = msg
+
+    def Comm(self,value):
+        self.DoComm = value
+        while self.DoComm == 1:
+            if self.Message != 0:
+                self.Client.send(self.Message.encode())
+                self.Message = 0
+            try:
                 data = self.Client.recv(1024).decode()
-                print("------------------{} ({}) :  {}" .format(self.Nickname, self.Address, data))
-                self.Client.send('Message transmis avec succès'.encode())
-                self.Client.send('Message transmis avec succès 222222222'.encode())
+                if not data: # si on ne recoit plus rien
+                    if verbose : print(("{} vient de se déconnecter!").format(self.Nickname))
+                    break  # on break la boucle (sinon les bips vont se repeter)
+                self.RequestTreatment(data)
+            except:
+                pass
+            '''RequeteDuClient = self.Client.recv(1024).decode() # on recoit 255 caracteres grand max
+            if not RequeteDuClient: # si on ne recoit plus rien
+                if verbose : print(("L'adresse {} vient de se déconnecter!").format(self.Address))
+                break  # on break la boucle (sinon les bips vont se repeter)
+            self.RequestTreatment(RequeteDuClient)
 
-
+                time.sleep(1)
+                data = bytes("coucou ! ça marche enfin", 'utf8') # on rentre des donnees
+                self.Client.send(data)'''
 
 
     def run(self):
@@ -101,9 +117,10 @@ class Guest(threading.Thread) :
             self.GetAuth()
         except:
             print("impossible d'authentifier le client {}".format(self.Address))
-            self.Authenticated = 0
-        if self.Authenticated:
-            self.Comm()
+
+        if self.Authenticated : self.Comm(1)
+
+
 
 
 class Receptionist (threading.Thread):

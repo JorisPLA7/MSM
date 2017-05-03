@@ -15,6 +15,7 @@ class NetThread (threading.Thread) :
         self.Message = 0
 
     def run(self):
+
         while 1:
             if self.Message != 0:
                 Sock.send(self.Message.encode())
