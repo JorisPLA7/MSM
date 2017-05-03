@@ -6,7 +6,7 @@ import time
 global Sock
 
 Sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM) # on cree notre socket
-Sock.settimeout(2.0)
+Sock.settimeout(2.0) #timeout crucial pour que le serv abandonne l'écoute toute les 2 secondes pour transmettre le(s) message(s)
 
 class NetThread (threading.Thread) :
     '''Classe-Thread chargé de l'envoi & récéption de donnée via le socket une fois le client authentifié.
@@ -15,18 +15,18 @@ class NetThread (threading.Thread) :
     Par Joris Placette
     '''
     def __init__(self):
-        threading.Thread.__init__(self)
+        threading.Thread.__init__(self) #séquence init du thread
         self.Message = 0
 
     def run(self):
 
         while 1:
             if self.Message != 0:
-                Sock.send(self.Message.encode())
+                Sock.send(self.Message.encode()) #envoi du message ss forme de bytecode
                 self.Message = 0
 
             try :
-                data = Sock.recv(1024).decode()
+                data = Sock.recv(1024).decode() #attente d'une reponse pdt 2sec en cas de timeout retourne une erreur, d'ou le try & except
                 print('Received from server: ' + data)
             except:
                 pass
@@ -37,21 +37,22 @@ class Net ():
     Par Joris Placette
     '''
     def __init__(self,Host, Port, Nickname, Pass):
-        self.Host = socket.gethostbyname(Host)
+        self.Host = socket.gethostbyname(Host) #récupération de l'adresse auprès des DNS par défaut si nom de domaine fourni
         self.Port = Port
-        self.Nickname = Nickname
-        self.NickLen = str(len(self.Nickname))
+        self.Nickname = Nickname #La Gui indique Pseudo au lieu de Nickname, doit mesurer 10 charactères ou moins
+        self.NickLen = str(len(self.Nickname))  #calcul de la longueur du Pseudonyme
         self.Pass = Pass
         self.Connected = False
         self.NetThread = NetThread()
-        self.NetThread.start()
+        self.NetThread.start() #Démarrage du thread chargé d'éccouter et de shipper les messages
 
     def Authenticate(self):
         '''Envoie une requette d'authentification.
         Necessaire coté serveur c'est la première chose à faire après avoir initialisé Net.
         Par Joris Placette
         '''
-        data = bytes("AUTH" + self.NickLen + self.Nickname, 'utf8')
+        data = bytes("AUTH" + self.NickLen + self.Nickname, 'utf8') #on crée la chaine d'info d'authentification comme "AUTH7exemple"
+
         try:
             Sock.connect((self.Host,self.Port)) # on se connecte sur le serveur avec les informations données
             print("Connection avec le serveur...")
@@ -59,9 +60,7 @@ class Net ():
             print("Authentification auprès du serveur...")
             time.sleep(1) #afin de donner le temps au serv d'être en écoute
 
-            self.Connected = True
-
-
+            self.Connected = True #la connexion a été établie, MAJ du status
 
         except:
             print("Impossible de se connecter au serveur !")
@@ -72,28 +71,33 @@ class Net ():
         Par Joris Placette
         '''
         return self.Connected
+
     def Disconnect(self):
         '''Force la fermeture de la connexion, rends impossible l'entrée et la sortie de données.
         Par Joris Placette
         '''
-        Sock.close()
-        print("Disconnected", sep=' ')
+        Sock.close() # rends impossible l'entrée et la sortie de données.
+        print("Disconnected")
 
     def SendMsg(self,typed):
         '''Permet de transmettre une chaine de caractères brute au serveur.
 
-        Version DEV :
+        /!\ : Pour le moment les messages sont transmis toute les 2sec et non empillés, donc en cas de spam des messages seront perdus :/
+
+        /!\ : Version DEV :
             Svp pay attention :) .
             Si la Chaine est reconnue comme une ligne de code python alors elle est EXECUTEE.
         Par Joris Placette
         '''
-        self.NetThread.Message = typed
+        self.NetThread.Message = typed #transmett la chaine au thread, on n'execute pas de fonction sinon il faut attentdre la fin de celle-ci , on se contente donc de transmettre la donnée.
 
     def WhoAmI(self):
         '''Renvoie le Pseudonyme déclaré au serveur lors de l'__init__()
         Par Joris Placette
         '''
         return self.Nickname
+
+
 
 def debug():
     '''Saisir du code en cours de route, ça peut toujours servir... :)
@@ -107,13 +111,11 @@ def debug():
         except:
             pass
 
-
 def login():
     '''Fct de démonstration et de test.
     c'est un cadeau pour toi Arth <3 ^^
     Par Joris Placette
     '''
-    ##phase de login
     Host = "0"
     if Host == "0":
             Host ="127.0.0.1"
@@ -134,7 +136,5 @@ def login():
             Typed = input("{} :  ".format(Nickname))
             MyNet.SendMsg(Typed)
 
-while 1 :
-    login()
-
-# On est connecte, on fait une boucle infinie d'inputs pour l'envoi des messages :
+if __name__ == '__main__':
+    login() # ce fichier sera peut-être une librairie, il faut donc empêcher l'inclusion du login si appelée par un autre fichier.

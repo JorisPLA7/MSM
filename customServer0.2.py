@@ -101,16 +101,6 @@ class Guest(threading.Thread) :
                 self.RequestTreatment(data)
             except:
                 pass
-            '''RequeteDuClient = self.Client.recv(1024).decode() # on recoit 255 caracteres grand max
-            if not RequeteDuClient: # si on ne recoit plus rien
-                if verbose : print(("L'adresse {} vient de se déconnecter!").format(self.Address))
-                break  # on break la boucle (sinon les bips vont se repeter)
-            self.RequestTreatment(RequeteDuClient)
-
-                time.sleep(1)
-                data = bytes("coucou ! ça marche enfin", 'utf8') # on rentre des donnees
-                self.Client.send(data)'''
-
 
     def run(self):
         try:
