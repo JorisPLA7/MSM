@@ -3,30 +3,29 @@
 import socket # on importe le module
 import threading
 import time
-
+from multiprocessing import Process
 global Sock
 
 Sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM) # on cree notre socket
+Sock.settimeout(2.0)
 
 class NetThread (threading.Thread) :
     def __init__(self):
         threading.Thread.__init__(self)
-        self.DoListen = 1
         self.Message = 0
+
     def run(self):
         while 1:
             if self.Message != 0:
                 Sock.send(self.Message.encode())
+                self.Message = 0
+
+            try :
                 data = Sock.recv(1024).decode()
-                print ('Received from server: ' + data)
-                message = 0
+                print('Received from server: ' + data)
+            except:
+                pass
 
-
-
-        mySocket.close()
-
-    def SendMsg (self, msg):
-        self.Message = msg
 
 class Net ():
     def __init__(self,Host, Port, Nickname, Pass):
@@ -50,6 +49,8 @@ class Net ():
 
             self.Connected = True
 
+
+
         except:
             print("Impossible de se connecter au serveur !")
             self.Connected = False
@@ -59,9 +60,8 @@ class Net ():
     def Disconnect(self):
         print("Disconnected", sep=' ')
 
-    def SendMsg(self, msg):
-        data = bytes(msg, 'utf8') # on rentre des donnees
-        Sock.send(data) # on envoie ces donnees
+    def SendMsg(self,typed):
+        self.NetThread.Message = typed
 
     def Execute(self):
         pass
@@ -88,8 +88,8 @@ def login():
     if MyNet.Connected == True :
         print("Vous êtes connecté en tant que {}".format(MyNet.WhoAmI()))
         while True:
-            a = input("{} :  ".format(Nickname))
-            MyNet.NetThread.SendMsg(a)
+            Typed = input("{} :  ".format(Nickname))
+            MyNet.SendMsg(Typed)
 
     """
     data = self.Client.recv(64) # on recoit x caracteres grand max
