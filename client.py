@@ -3,13 +3,17 @@
 import socket # on importe le module
 import threading
 import time
-from multiprocessing import Process
 global Sock
 
 Sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM) # on cree notre socket
 Sock.settimeout(2.0)
 
 class NetThread (threading.Thread) :
+    '''Classe-Thread chargé de l'envoi & récéption de donnée via le socket une fois le client authentifié.
+    N'est pas censé être manipulé par Mes camarades, il s'occupe de la partie "veille" de la classe Net.
+    Voir help(Net())
+    Par Joris Placette
+    '''
     def __init__(self):
         threading.Thread.__init__(self)
         self.Message = 0
@@ -29,6 +33,9 @@ class NetThread (threading.Thread) :
 
 
 class Net ():
+    '''Classe interactive (API) pour mes camarades, se charge de mettre en forme les interactions client-serveurr pour une utilisation simplifiée des fonctionnallités socket.
+    Par Joris Placette
+    '''
     def __init__(self,Host, Port, Nickname, Pass):
         self.Host = socket.gethostbyname(Host)
         self.Port = Port
@@ -40,6 +47,10 @@ class Net ():
         self.NetThread.start()
 
     def Authenticate(self):
+        '''Envoie une requette d'authentification.
+        Necessaire coté serveur c'est la première chose à faire après avoir initialisé Net.
+        Par Joris Placette
+        '''
         data = bytes("AUTH" + self.NickLen + self.Nickname, 'utf8')
         try:
             Sock.connect((self.Host,self.Port)) # on se connecte sur le serveur avec les informations données
@@ -57,29 +68,60 @@ class Net ():
             self.Connected = False
 
     def Connected(self):
+        '''Affiche le statut du client vis à vis du serveur
+        Par Joris Placette
+        '''
         return self.Connected
     def Disconnect(self):
+        '''Force la fermeture de la connexion, rends impossible l'entrée et la sortie de données.
+        Par Joris Placette
+        '''
+        Sock.close()
         print("Disconnected", sep=' ')
 
     def SendMsg(self,typed):
+        '''Permet de transmettre une chaine de caractères brute au serveur.
+
+        Version DEV :
+            Svp pay attention :) .
+            Si la Chaine est reconnue comme une ligne de code python alors elle est EXECUTEE.
+        Par Joris Placette
+        '''
         self.NetThread.Message = typed
 
-    def Execute(self):
-        pass
     def WhoAmI(self):
+        '''Renvoie le Pseudonyme déclaré au serveur lors de l'__init__()
+        Par Joris Placette
+        '''
         return self.Nickname
 
-    def ListRooms(self):
-        return (salle1, salle2, salle3)
+def debug():
+    '''Saisir du code en cours de route, ça peut toujours servir... :)
+    Par Joris Placette
+    '''
+    print("Fonction de débuggage...")
+    while 1 :
+
+        try :
+            exec(input(">>>")) #sorte d'invite de commande en cas de lancement interactif sur le serveur
+        except:
+            pass
 
 
 def login():
+    '''Fct de démonstration et de test.
+    c'est un cadeau pour toi Arth <3 ^^
+    Par Joris Placette
+    '''
     ##phase de login
     Host = "0"
     if Host == "0":
             Host ="127.0.0.1"
     Port = 8082
+    print("Saisir 'q' pour obtenir un terminal de commande")
     Nickname = str(input("saisir un pseudo :  "))
+    if Nickname == 'q':
+        debug()
     Pass = "lol ;')"
     global MyNet
 
@@ -91,14 +133,6 @@ def login():
         while True:
             Typed = input("{} :  ".format(Nickname))
             MyNet.SendMsg(Typed)
-
-    """
-    data = self.Client.recv(64) # on recoit x caracteres grand max
-    RequeteDuClient = data.decode()
-    RequeteDuClient = str(object=RequeteDuClient)
-    print(RequeteDuClient)
-    a = input()
-"""
 
 while 1 :
     login()
