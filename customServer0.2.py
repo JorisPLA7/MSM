@@ -90,7 +90,7 @@ class Guest(threading.Thread) :
                     print("------------------{} ({}) :  {}" .format(self.Nickname, self.Address, RequeteDuClient))
                     time.sleep(1)
                     data = bytes("coucou ! ça marche enfin", 'utf8') # on rentre des donnees
-                    .send(data)
+                    self.Client.send(data)
             except:
                 pass
 
