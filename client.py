@@ -8,32 +8,25 @@ global Sock
 
 Sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM) # on cree notre socket
 
-class Receiver (threading.Thread) :
+class NetThread (threading.Thread) :
     def __init__(self):
         threading.Thread.__init__(self)
         self.DoListen = 1
-
+        self.Message = 0
     def run(self):
-        print("ARCHTUNG CA FUNCTIONNIERT")
         while 1:
-            Sock.listen()
-            data = Sock.recv(1024).decode()
-            print("--------------serv : {}".format(data))
+            if self.Message != 0:
+                Sock.send(self.Message.encode())
+                data = Sock.recv(1024).decode()
+                print ('Received from server: ' + data)
+                message = 0
 
-        while self.DoListen == 1:
-            try:
-                RequeteDuServ = Sock.recv(1024).decode() # on recoit 255 caracteres grand max
-                if not RequeteDuServ: # si on ne recoit plus rien
-                    if verbose : print(("ecoute stopée").format(self.Address))
-                    break  # on break la boucle (sinon les bips vont se repeter)
-                try:
-                    exec(RequeteDuServ)# affiche les donnees
-                except:
-                    print("------------------ {}" .format(RequeteDuServ))
-            except:
-                print("Le serv {} ( {} ) n'est plus sous écoute!".format(self.Nickname, self.Address))
-                """break"""
 
+
+        mySocket.close()
+
+    def SendMsg (self, msg):
+        self.Message = msg
 
 class Net ():
     def __init__(self,Host, Port, Nickname, Pass):
@@ -43,8 +36,8 @@ class Net ():
         self.NickLen = str(len(self.Nickname))
         self.Pass = Pass
         self.Connected = False
-        self.Receiver = Receiver()
-        self.Receiver.start()
+        self.NetThread = NetThread()
+        self.NetThread.start()
 
     def Authenticate(self):
         data = bytes("AUTH" + self.NickLen + self.Nickname, 'utf8')
@@ -96,7 +89,7 @@ def login():
         print("Vous êtes connecté en tant que {}".format(MyNet.WhoAmI()))
         while True:
             a = input("{} :  ".format(Nickname))
-            MyNet.SendMsg(a)
+            MyNet.NetThread.SendMsg(a)
 
     """
     data = self.Client.recv(64) # on recoit x caracteres grand max

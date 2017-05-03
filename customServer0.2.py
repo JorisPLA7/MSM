@@ -91,6 +91,7 @@ class Guest(threading.Thread) :
                     time.sleep(1)
                     data = bytes("coucou ! ça marche enfin", 'utf8') # on rentre des donnees
                     self.Client.send(data)
+                    time.sleep(5)
             except:
                 pass
 
