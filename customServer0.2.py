@@ -21,21 +21,26 @@ try :
 except:
     print("Impossible d'importer la bibliothèque threading.Thread !")
 
-
-verbose = 0
 Sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 Host = '127.0.0.1' # l'ip locale de l'ordinateur
 Port = 8082 # choix d'un port
 
 global MyClient
 MyClient = []
-global ClientList
-ClientList = {}
 global NicknameList
 NicknameList = {}
+'''
+La NicknameList est un historique des utilisateurs connectés depuis le lancement.
+Elle permet de savoir à quel thread s'adresser pour envoyer des informations.
+
+Par exemple pour envoyer un message à 'joris' :
+MyClient[NicknameList['joris']].Ship('Message!')
+
+'''
 global Timeout
 Timeout = 1.0
-
+global verbose
+verbose = 0 #en cas de besoin il est possible de demander au serveur plus d'informations.
 # on bind notre socket :
 Sock.bind((Host,Port))
 
@@ -90,7 +95,6 @@ class Guest(threading.Thread) :
                 self.Nickname = RequeteDuClient[5:5+ReceivedNickLen]
                 self.Authenticated = True
                 me = (self.Client)
-                ClientList[self.Nickname]= (True,me) ## True, pour indiquer que le client est connecté
                 NicknameList[self.Nickname] = self.GuestID #permet à samuel de savoir à quel thread s'adresser en donnant un pseudo
                 print("Historique des clients : {}".format(NicknameList))
                 print("Client {} authentifié !".format(self.Nickname))
@@ -102,9 +106,20 @@ class Guest(threading.Thread) :
             print("------------------{} ({}) :  {}" .format(self.Nickname, self.Address, Request))
 
     def Ship(self, msg):
+        '''Cette fonction permet à mes camarades d'envoyer une chaine de caractères au client.
+
+        Par Joris Placette
+        '''
         self.Message = msg
 
     def Comm(self,value):
+        ''' Classe chargée de l'envoi & récéption de donnée via le socket une fois le client authentifié.
+        Elle s'occupe de la partie "veille" de la classe Net.
+
+        N'est pas concue pour être manipulée par Mes camarades.
+
+        Par Joris Placette
+        '''
         self.DoComm = value #variable permettant de stopper les échanges
         while self.DoComm == 1:
             if self.Message != 0: #si un message a été ajouté depuis la dernière fois
@@ -113,7 +128,7 @@ class Guest(threading.Thread) :
             try:
                 data = self.Client.recv(1024).decode() #le thread reste à l'écoute d'un message pendant la durée renseignée par Timeout
                 if not data: # si on ne recoit plus rien
-                    if verbose : print(("{} vient de se déconnecter!").format(self.Nickname))
+                    print(("{} vient de se déconnecter!").format(self.Nickname))
                     break  # on break la boucle (sinon les bips vont se repeter & la donnée sera traitée à vide)
                 self.RequestTreatment(data) #on sous-traite les données pour reserver cette fonction aux seuls communications
             except:
