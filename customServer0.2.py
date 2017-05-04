@@ -1,9 +1,25 @@
 # -∗- coding: utf-8 -∗-
 
-import socket
-import threading
-import time
-from threading import Thread
+try :
+    import socket
+    print("Bibliothèque socket importée avec succès !")
+except:
+    print("Impossible d'importer la bibliothèque socket !")
+try :
+    import threading
+    print("Bibliothèque threading importée avec succès !")
+except:
+    print("Impossible d'importer la bibliothèque threading !")
+try :
+    import time
+    print("Bibliothèque time importée avec succès !")
+except:
+    print("Impossible d'importer la bibliothèque time !")
+try :
+    from threading import Thread
+    print("Bibliothèque threading.Thread importée avec succès !")
+except:
+    print("Impossible d'importer la bibliothèque threading.Thread !")
 
 
 verbose = 0
@@ -16,13 +32,17 @@ MyClient = []
 global ClientList
 ClientList = {}
 global NicknameList
-NicknameList = []
+NicknameList = {}
+global Timeout
+Timeout = 1.0
+
 # on bind notre socket :
 Sock.bind((Host,Port))
 
 class ServerNet():
     '''Classe Serveur, sert d'interface entre certains threads et mes collègues
-    Joris Placette
+
+    Par Joris Placette
     '''
     def __init__(self): #initiallisation du thread de reception des nouveaux clients
         self.ReceptionistThread = Receptionist(1, "ReceptionistThread")
@@ -33,18 +53,16 @@ class ServerNet():
             self.ReceptionistThread.start()
 
 
-
-
-
 class Guest(threading.Thread) :
     '''Classe de gestion de Client individuellement.
-    Joris Placette
+
+    Par Joris Placette
     '''
     def __init__(self, GuestID, Client, Address): #initiallisation des variables de l'objet nouvellement crée
         threading.Thread.__init__(self)
         self.GuestID = GuestID
         self.Client = Client
-        self.Client.settimeout(2.0) #timeout crucial pour que le serv abandonne l'écoute toute les 2 secondes pour transmettre le(s) message(s)
+        self.Client.settimeout(Timeout) #timeout crucial pour que le serv abandonne l'écoute toute les 2 secondes pour transmettre le(s) message(s)
         self.Address = Address
         self.Authenticated = False
         self.Nickname = None
@@ -53,7 +71,6 @@ class Guest(threading.Thread) :
         self.Authenticated = 0
         self.DoComm = 0
         self.Message = 0
-
 
 
     def SetNickname(self, NewNick):
@@ -74,7 +91,7 @@ class Guest(threading.Thread) :
                 self.Authenticated = True
                 me = (self.Client)
                 ClientList[self.Nickname]= (True,me) ## True, pour indiquer que le client est connecté
-                NicknameList.append((time.asctime(),self.Nickname))
+                NicknameList[self.Nickname] = self.GuestID #permet à samuel de savoir à quel thread s'adresser en donnant un pseudo
                 print("Historique des clients : {}".format(NicknameList))
                 print("Client {} authentifié !".format(self.Nickname))
 
@@ -88,21 +105,34 @@ class Guest(threading.Thread) :
         self.Message = msg
 
     def Comm(self,value):
-        self.DoComm = value
+        self.DoComm = value #variable permettant de stopper les échanges
         while self.DoComm == 1:
-            if self.Message != 0:
-                self.Client.send(self.Message.encode())
+            if self.Message != 0: #si un message a été ajouté depuis la dernière fois
+                self.Client.sendall(self.Message.encode()) #sendall permet de s'assurer que le message arrive EN ENTIER
                 self.Message = 0
             try:
-                data = self.Client.recv(1024).decode()
+                data = self.Client.recv(1024).decode() #le thread reste à l'écoute d'un message pendant la durée renseignée par Timeout
                 if not data: # si on ne recoit plus rien
                     if verbose : print(("{} vient de se déconnecter!").format(self.Nickname))
-                    break  # on break la boucle (sinon les bips vont se repeter)
-                self.RequestTreatment(data)
+                    break  # on break la boucle (sinon les bips vont se repeter & la donnée sera traitée à vide)
+                self.RequestTreatment(data) #on sous-traite les données pour reserver cette fonction aux seuls communications
             except:
+                #en cas de time out on passe simplement à la suite
                 pass
 
+    def WhoIsIt(self):
+        '''Fonction retournant le Pseudonyme rensigné par l'utilisateur lors de la phase d'authentification.
+        Par Joris Placette
+        '''
+        return self.Nickname
+
     def run(self):
+        '''Se lance automatiquement en thread.
+
+        N'est pas concue pour être manipulée par Mes camarades.
+
+        Par Joris Placette
+        '''
         try:
             self.GetAuth()
         except:
@@ -116,7 +146,10 @@ class Guest(threading.Thread) :
 class Receptionist (threading.Thread):
     ''' Classe de threading chargée de récéptionner les conncetions des clients.
     concue pour être invoquée en 1 exemplaire par la classe ServerNet.
-    N'est pas prévue pour être manipulée par l'utilisateur.
+
+    N'est pas concue pour être manipulée par Mes camarades.
+
+    Par Joris Placette
     '''
     def __init__(self, threadID, name): #initiallisation des variables de l'objet nouvellement crée
         threading.Thread.__init__(self)
@@ -136,16 +169,22 @@ class Receptionist (threading.Thread):
 
 
 
+def SimpleHost():
+    '''Fct de démonstration et de test.
+    c'est un cadeau pour toi Arth <3 ^^
 
+    Par Joris Placette
+    '''
+    MyServ = ServerNet()
+    MyServ.Listen(True)
+    print("En attente de clients...")
 
+    while 1 :
 
-MyServ = ServerNet()
-MyServ.Listen(True)
-print("En attente de clients...")
+        try :
+            exec(input(">>>")) #sorte d'invite de commande en cas de lancement interactif sur le serveur
+        except:
+            pass
 
-while 1 :
-
-    try :
-        exec(input(">>>")) #sorte d'invite de commande en cas de lancement interactif sur le serveur
-    except:
-        pass
+if __name__ == '__main__':
+    SimpleHost() # ce fichier sera peut-être une librairie, il faut donc empêcher l'inclusion du login si appelée par un autre fichier.

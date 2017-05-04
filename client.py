@@ -1,17 +1,31 @@
-#!/usr/bin/python3.2
 # -∗- coding: utf-8 -∗-
-import socket # on importe le module
-import threading
-import time
-global Sock
 
+
+try :
+    import socket
+    print("Bibliothèque socket importée avec succès !")
+except:
+    print("Impossible d'importer la bibliothèque socket !")
+try :
+    import threading
+    print("Bibliothèque threading importée avec succès !")
+except:
+    print("Impossible d'importer la bibliothèque threading !")
+try :
+    import time
+    print("Bibliothèque time importée avec succès !")
+except:
+    print("Impossible d'importer la bibliothèque time !")
+
+global Sock #devra être accessible dans toutes les classes
 Sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM) # on cree notre socket
-Sock.settimeout(2.0) #timeout crucial pour que le serv abandonne l'écoute toute les 2 secondes pour transmettre le(s) message(s)
+Sock.settimeout(1.0) #timeout crucial pour que le serv abandonne l'écoute toute les 2 secondes pour transmettre le(s) message(s)
 
 class NetThread (threading.Thread) :
     '''Classe-Thread chargé de l'envoi & récéption de donnée via le socket une fois le client authentifié.
     N'est pas censé être manipulé par Mes camarades, il s'occupe de la partie "veille" de la classe Net.
     Voir help(Net())
+
     Par Joris Placette
     '''
     def __init__(self):
@@ -22,7 +36,7 @@ class NetThread (threading.Thread) :
 
         while 1:
             if self.Message != 0:
-                Sock.send(self.Message.encode()) #envoi du message ss forme de bytecode
+                Sock.sendall(self.Message.encode()) #envoi du message ss forme de bytecode
                 self.Message = 0
 
             try :
@@ -34,6 +48,7 @@ class NetThread (threading.Thread) :
 
 class Net ():
     '''Classe interactive (API) pour mes camarades, se charge de mettre en forme les interactions client-serveurr pour une utilisation simplifiée des fonctionnallités socket.
+
     Par Joris Placette
     '''
     def __init__(self,Host, Port, Nickname, Pass):
@@ -49,6 +64,7 @@ class Net ():
     def Authenticate(self):
         '''Envoie une requette d'authentification.
         Necessaire coté serveur c'est la première chose à faire après avoir initialisé Net.
+
         Par Joris Placette
         '''
         data = bytes("AUTH" + self.NickLen + self.Nickname, 'utf8') #on crée la chaine d'info d'authentification comme "AUTH7exemple"
@@ -56,7 +72,7 @@ class Net ():
         try:
             Sock.connect((self.Host,self.Port)) # on se connecte sur le serveur avec les informations données
             print("Connection avec le serveur...")
-            Sock.send(data)
+            Sock.sendall(data)
             print("Authentification auprès du serveur...")
             time.sleep(1) #afin de donner le temps au serv d'être en écoute
 
@@ -68,12 +84,14 @@ class Net ():
 
     def Connected(self):
         '''Affiche le statut du client vis à vis du serveur
+
         Par Joris Placette
         '''
         return self.Connected
 
     def Disconnect(self):
         '''Force la fermeture de la connexion, rends impossible l'entrée et la sortie de données.
+
         Par Joris Placette
         '''
         Sock.close() # rends impossible l'entrée et la sortie de données.
@@ -87,12 +105,14 @@ class Net ():
         /!\ : Version DEV :
             Svp pay attention :) .
             Si la Chaine est reconnue comme une ligne de code python alors elle est EXECUTEE.
+
         Par Joris Placette
         '''
         self.NetThread.Message = typed #transmett la chaine au thread, on n'execute pas de fonction sinon il faut attentdre la fin de celle-ci , on se contente donc de transmettre la donnée.
 
     def WhoAmI(self):
         '''Renvoie le Pseudonyme déclaré au serveur lors de l'__init__()
+
         Par Joris Placette
         '''
         return self.Nickname
@@ -101,6 +121,7 @@ class Net ():
 
 def debug():
     '''Saisir du code en cours de route, ça peut toujours servir... :)
+
     Par Joris Placette
     '''
     print("Fonction de débuggage...")
@@ -114,6 +135,7 @@ def debug():
 def login():
     '''Fct de démonstration et de test.
     c'est un cadeau pour toi Arth <3 ^^
+
     Par Joris Placette
     '''
     Host = "0"
