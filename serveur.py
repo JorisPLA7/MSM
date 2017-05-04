@@ -34,7 +34,7 @@ La NicknameList est un historique des utilisateurs connectés depuis le lancemen
 Elle permet de savoir à quel thread s'adresser pour envoyer des informations.
 
 Par exemple pour envoyer un message à 'joris' :
-MyClient[NicknameList['joris']].Ship('Message!')
+MyClient[NicknameList['joris']].SendStr('Message!')
 
 '''
 global Timeout
@@ -65,7 +65,7 @@ class Guest(threading.Thread) :
     '''
     def __init__(self, GuestID, Client, Address): #initiallisation des variables de l'objet nouvellement crée
         threading.Thread.__init__(self)
-        self.GuestID = GuestID
+        self.__GuestID = GuestID
         self.Client = Client
         self.Client.settimeout(Timeout) #timeout crucial pour que le serv abandonne l'écoute toute les 2 secondes pour transmettre le(s) message(s)
         self.Address = Address
@@ -73,7 +73,6 @@ class Guest(threading.Thread) :
         self.Nickname = None
         self.NickLen = None
         self.AuthenticationThread = 0
-        self.Authenticated = 0
         self.DoComm = 0
         self.Message = 0
 
@@ -95,7 +94,7 @@ class Guest(threading.Thread) :
                 self.Nickname = RequeteDuClient[5:5+ReceivedNickLen]
                 self.Authenticated = True
                 me = (self.Client)
-                NicknameList[self.Nickname] = self.GuestID #permet à samuel de savoir à quel thread s'adresser en donnant un pseudo
+                NicknameList[self.Nickname] = self.__GuestID #permet à samuel de savoir à quel thread s'adresser en donnant un pseudo
                 print("Historique des clients : {}".format(NicknameList))
                 print("Client {} authentifié !".format(self.Nickname))
 
@@ -105,7 +104,7 @@ class Guest(threading.Thread) :
         except:
             print("------------------{} ({}) :  {}" .format(self.Nickname, self.Address, Request))
 
-    def Ship(self, msg):
+    def SendStr(self, msg):
         '''Cette fonction permet à mes camarades d'envoyer une chaine de caractères au client.
 
         Par Joris Placette

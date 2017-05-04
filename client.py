@@ -61,8 +61,8 @@ class Net ():
         self.NickLen = str(len(self.Nickname))  #calcul de la longueur du Pseudonyme
         self.Pass = Pass
         self.Connected = False
-        self.NetThread = NetThread()
-        self.NetThread.start() #Démarrage du thread chargé d'éccouter et de shipper les messages
+        self.__NetThread = NetThread()
+        self.__NetThread.start() #Démarrage du thread chargé d'éccouter et de shipper les messages
 
     def Authenticate(self):
         '''Envoie une requette d'authentification.
@@ -100,7 +100,7 @@ class Net ():
         Sock.close() # rends impossible l'entrée et la sortie de données.
         print("Disconnected")
 
-    def SendMsg(self,typed):
+    def SendStr(self,typed):
         '''Permet de transmettre une chaine de caractères brute au serveur.
 
         /!\ : Pour le moment les messages sont transmis toute les 2sec et non empillés, donc en cas de spam des messages seront perdus :/
@@ -111,7 +111,7 @@ class Net ():
 
         Par Joris Placette
         '''
-        self.NetThread.Message = typed #transmett la chaine au thread, on n'execute pas de fonction sinon il faut attentdre la fin de celle-ci , on se contente donc de transmettre la donnée.
+        self.__NetThread.Message = typed #transmett la chaine au thread, on n'execute pas de fonction sinon il faut attentdre la fin de celle-ci , on se contente donc de transmettre la donnée.
 
     def WhoAmI(self):
         '''Renvoie le Pseudonyme déclaré au serveur lors de l'__init__()
@@ -159,7 +159,7 @@ def login():
         print("Vous êtes connecté en tant que {}".format(MyNet.WhoAmI()))
         while True:
             Typed = input("{} :  ".format(Nickname))
-            MyNet.SendMsg(Typed)
+            MyNet.SendStr(Typed)
 
 if __name__ == '__main__':
     login() # ce fichier sera peut-être une librairie, il faut donc empêcher l'inclusion du login si appelée par un autre fichier.
