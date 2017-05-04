@@ -23,7 +23,10 @@ Sock.settimeout(1.0) #timeout crucial pour que le serv abandonne l'écoute toute
 
 class NetThread (threading.Thread) :
     '''Classe-Thread chargé de l'envoi & récéption de donnée via le socket une fois le client authentifié.
-    N'est pas censé être manipulé par Mes camarades, il s'occupe de la partie "veille" de la classe Net.
+    Elle s'occupe de la partie "veille" de la classe Net.
+
+    N'est pas concue pour être manipulée par Mes camarades.
+
     Voir help(Net())
 
     Par Joris Placette

@@ -99,7 +99,7 @@ class Guest(threading.Thread) :
                 print("Historique des clients : {}".format(NicknameList))
                 print("Client {} authentifié !".format(self.Nickname))
 
-    def RequestTreatment(self, Request):
+    def __RequestTreatment(self, Request):
         try:
             exec(Request)# affiche les donnees
         except:
@@ -112,7 +112,7 @@ class Guest(threading.Thread) :
         '''
         self.Message = msg
 
-    def Comm(self,value):
+    def __Comm(self,value):
         ''' Classe chargée de l'envoi & récéption de donnée via le socket une fois le client authentifié.
         Elle s'occupe de la partie "veille" de la classe Net.
 
@@ -130,7 +130,7 @@ class Guest(threading.Thread) :
                 if not data: # si on ne recoit plus rien
                     print(("{} vient de se déconnecter!").format(self.Nickname))
                     break  # on break la boucle (sinon les bips vont se repeter & la donnée sera traitée à vide)
-                self.RequestTreatment(data) #on sous-traite les données pour reserver cette fonction aux seuls communications
+                self.__RequestTreatment(data) #on sous-traite les données pour reserver cette fonction aux seuls communications
             except:
                 #en cas de time out on passe simplement à la suite
                 pass
@@ -153,10 +153,7 @@ class Guest(threading.Thread) :
         except:
             print("impossible d'authentifier le client {}".format(self.Address))
 
-        if self.Authenticated : self.Comm(1)
-
-
-
+        if self.Authenticated : self. __Comm(1)
 
 class Receptionist (threading.Thread):
     ''' Classe de threading chargée de récéptionner les conncetions des clients.
