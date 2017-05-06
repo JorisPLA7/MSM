@@ -191,7 +191,7 @@ def Flow(clientID, clientAddress, clientNick, data):
 
 def SimpleHost():
     '''Fct de démonstration et de test.
-    c'est un cadeau pour toi Sam <3 ^^
+    c'est un cadeau pour toi Samuel <3 ^^
 
     Par Joris Placette
     '''
