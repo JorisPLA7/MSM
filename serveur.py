@@ -41,6 +41,7 @@ global Timeout
 Timeout = 1.0
 global verbose
 verbose = 0 #en cas de besoin il est possible de demander au serveur plus d'informations.
+global Flow
 # on bind notre socket :
 Sock.bind((Host,Port))
 
@@ -102,7 +103,7 @@ class Guest(threading.Thread) :
         try:
             exec(Request)# affiche les donnees
         except:
-            print("------------------{} ({}) :  {}" .format(self.Nickname, self.Address, Request))
+            Flow(self.__GuestID, self.Address, self.Nickname, Request)
 
     def SendStr(self, msg):
         '''Cette fonction permet à mes camarades d'envoyer une chaine de caractères au client.
@@ -179,10 +180,18 @@ class Receptionist (threading.Thread):
             i+=1
 
 
+def Flow(clientID, clientAddress, clientNick, data):
+    '''Cette fonction est appelée à chaque fois que des données sont recues.
+    Le traitement de ces données est une simple démonstration.
+    Cette fonction permettra à Samuel de recevoir et traiter les données émises par les clients.
+
+    Par Joris Placette
+    '''
+    print("-- {} -- {} {} :  {}" .format(clientID, clientNick, clientAddress, data))
 
 def SimpleHost():
     '''Fct de démonstration et de test.
-    c'est un cadeau pour toi Arth <3 ^^
+    c'est un cadeau pour toi Sam <3 ^^
 
     Par Joris Placette
     '''
