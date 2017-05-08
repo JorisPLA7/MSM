@@ -44,7 +44,7 @@ class NetThread (threading.Thread) :
 
             try :
                 data = Sock.recv(1024).decode() #attente d'une reponse pdt 2sec en cas de timeout retourne une erreur, d'ou le try & except
-                print('Received from server: ' + data)
+                print(data)
             except:
                 pass
 
@@ -100,7 +100,7 @@ class Net ():
         Sock.close() # rends impossible l'entrée et la sortie de données.
         print("Disconnected")
 
-    def SendStr(self,typed):
+    def Transmit(self,typed):
         '''Permet de transmettre une chaine de caractères brute au serveur.
 
         /!\ : Pour le moment les messages sont transmis toute les 2sec et non empillés, donc en cas de spam des messages seront perdus :/
@@ -146,7 +146,7 @@ def login():
             Host ="127.0.0.1"
     Port = 8082
     print("Saisir 'q' pour obtenir un terminal de commande")
-    Nickname = str(input("saisir un pseudo :  "))
+    Nickname = str(input("saisir un pseudo (inferieur à 10 caractères):  "))
     if Nickname == 'q':
         debug()
     Pass = "lol ;')"
@@ -158,8 +158,8 @@ def login():
     if MyNet.Connected == True :
         print("Vous êtes connecté en tant que {}".format(MyNet.WhoAmI()))
         while True:
-            Typed = input("{} :  ".format(Nickname))
-            MyNet.SendStr(Typed)
+            Typed = input(">")
+            MyNet.Transmit(Typed)
 
 if __name__ == '__main__':
     login() # ce fichier sera peut-être une librairie, il faut donc empêcher l'inclusion du login si appelée par un autre fichier.

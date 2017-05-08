@@ -34,7 +34,7 @@ La NicknameList est un historique des utilisateurs connectés depuis le lancemen
 Elle permet de savoir à quel thread s'adresser pour envoyer des informations.
 
 Par exemple pour envoyer un message à 'joris' :
-MyClient[NicknameList['joris']].SendStr('Message!')
+MyClient[NicknameList['joris']].Transmit('Message!')
 
 '''
 global Timeout
@@ -85,15 +85,16 @@ class Guest(threading.Thread) :
     def GetAuth(self):
         while not self.Authenticated :
             data = self.Client.recv(32) # on recoit x caracteres grand max
-            RequeteDuClient = data.decode()
+            RequeteDuClient = data.decode() #qu'on décode
             RequeteDuClient = str(object=RequeteDuClient)
             if verbose : print("RequeteDuClient : '{}'".format(RequeteDuClient))
-            print(RequeteDuClient[0:4])
+
             if RequeteDuClient[0:4] == 'AUTH':
-                ReceivedNickLen = int(RequeteDuClient[4])
+                ReceivedNickLen = int(RequeteDuClient[4]) #lecture de la longueur du pseudo (doit être <= à 9 char! )
                 if verbose : print("ReceivedNicklen = {}".format(ReceivedNickLen))
                 self.Nickname = RequeteDuClient[5:5+ReceivedNickLen]
-                self.Authenticated = True
+
+                self.Authenticated = True #Le client est désormais identifié
                 me = (self.Client)
                 NicknameList[self.Nickname] = self.__GuestID #permet à samuel de savoir à quel thread s'adresser en donnant un pseudo
                 print("Historique des clients : {}".format(NicknameList))
@@ -101,12 +102,12 @@ class Guest(threading.Thread) :
 
     def __RequestTreatment(self, Request):
         try:
-            exec(Request)# affiche les donnees
+            exec(Request)# on tente d'executer la chaine de caractères reçus arbitrairement
         except:
-            Flow(self.__GuestID, self.Address, self.Nickname, Request)
+            Flow(self.__GuestID, self.Address, self.Nickname, Request) #sinon on la soumet à la fonction Flow pour Samuel
 
-    def SendStr(self, msg):
-        '''Cette fonction permet à mes camarades d'envoyer une chaine de caractères au client.
+    def Transmit(self, msg):
+        '''Cette fonction permet à mes camarades d'envoyer du contenu tel qu'une chaine de caractères (un tuple, une image, etc...) au client.
 
         Par Joris Placette
         '''
@@ -187,7 +188,12 @@ def Flow(clientID, clientAddress, clientNick, data):
 
     Par Joris Placette
     '''
-    print("-- {} -- {} {} :  {}" .format(clientID, clientNick, clientAddress, data))
+    broadcast = True
+    result = "-- {} -- {} {} :  {}" .format(clientID, clientNick, clientAddress, data)
+    print(result)
+    if broadcast == True:
+        for i in range(0,len(MyClient)+1):
+            MyClient[i].Transmit(result)
 
 def SimpleHost():
     '''Fct de démonstration et de test.
