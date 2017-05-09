@@ -22,7 +22,7 @@ Sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM) # on cree notre socket
 Sock.settimeout(1.0) #timeout crucial pour que le serv abandonne l'écoute toute les 2 secondes pour transmettre le(s) message(s)
 
 class NetThread (threading.Thread) :
-    '''Classe-Thread chargé de l'envoi & récéption de donnée via le socket une fois le client authentifié.
+    '''Classe-Thread chargé de l'envoi & récéption de donnée via le socket une fois le client identifié.
     Elle s'occupe de la partie "veille" de la classe Net.
 
     N'est pas concue pour être manipulée par Mes camarades.
@@ -35,6 +35,12 @@ class NetThread (threading.Thread) :
         threading.Thread.__init__(self) #séquence init du thread
         self.Message = 0
 
+    def __RequestTreatment(self, Request):
+        try:
+            exec(Request) # on tente d'executer la chaine de caractères reçus arbitrairement
+        except:
+            print(data)
+
     def run(self):
 
         while 1:
@@ -44,10 +50,9 @@ class NetThread (threading.Thread) :
 
             try :
                 data = Sock.recv(1024).decode() #attente d'une reponse pdt 2sec en cas de timeout retourne une erreur, d'ou le try & except
-                print(data)
+                __RequestTreatment(data)
             except:
-                pass
-
+                pass #en cas de time-out on passe simplement à la suite
 
 class Net ():
     '''Classe interactive (API) pour mes camarades, se charge de mettre en forme les interactions client-serveurr pour une utilisation simplifiée des fonctionnallités socket.
@@ -59,24 +64,24 @@ class Net ():
         self.Port = Port
         self.Nickname = Nickname #La Gui indique Pseudo au lieu de Nickname, doit mesurer 10 charactères ou moins
         self.NickLen = str(len(self.Nickname))  #calcul de la longueur du Pseudonyme
-        self.Pass = Pass
+        self.Pass = Pass #le pas ne sert pas durant la phase d'identification du client, j'ai cependant implanté cette variable si mes camarades en ont besoin
         self.Connected = False
         self.__NetThread = NetThread()
         self.__NetThread.start() #Démarrage du thread chargé d'éccouter et de shipper les messages
 
-    def Authenticate(self):
-        '''Envoie une requette d'authentification.
+    def Identify(self):
+        '''Envoie une requette d'identification.
         Necessaire coté serveur c'est la première chose à faire après avoir initialisé Net.
 
         Par Joris Placette
         '''
-        data = bytes("AUTH" + self.NickLen + self.Nickname, 'utf8') #on crée la chaine d'info d'authentification comme "AUTH7exemple"
+        data = bytes("IDTF" + self.NickLen + self.Nickname, 'utf8') #on crée la chaine d'info d'identification comme "IDTF7exemple"
 
         try:
             Sock.connect((self.Host,self.Port)) # on se connecte sur le serveur avec les informations données
             print("Connection avec le serveur...")
             Sock.sendall(data)
-            print("Authentification auprès du serveur...")
+            print("Identification auprès du serveur...")
             time.sleep(1) #afin de donner le temps au serv d'être en écoute
 
             self.Connected = True #la connexion a été établie, MAJ du status
@@ -106,7 +111,7 @@ class Net ():
         /!\ : Pour le moment les messages sont transmis toute les 2sec et non empillés, donc en cas de spam des messages seront perdus :/
 
         /!\ : Version DEV :
-            Svp pay attention :) .
+            Svp pay attention :) !
             Si la Chaine est reconnue comme une ligne de code python alors elle est EXECUTEE.
 
         Par Joris Placette
@@ -150,11 +155,11 @@ def login():
     if Nickname == 'q':
         debug()
     Pass = "lol ;')"
-    global MyNet
 
+    global MyNet
     MyNet = Net(Host, Port , Nickname, Pass)
 
-    MyNet.Authenticate()
+    MyNet.Identify()
     if MyNet.Connected == True :
         print("Vous êtes connecté en tant que {}".format(MyNet.WhoAmI()))
         while True:

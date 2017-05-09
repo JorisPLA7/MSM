@@ -70,10 +70,10 @@ class Guest(threading.Thread) :
         self.Client = Client
         self.Client.settimeout(Timeout) #timeout crucial pour que le serv abandonne l'écoute toute les 2 secondes pour transmettre le(s) message(s)
         self.Address = Address
-        self.Authenticated = False
+        self.Identificated = False
         self.Nickname = None
         self.NickLen = None
-        self.AuthenticationThread = 0
+        self.IdentificationThread = 0
         self.DoComm = 0
         self.Message = 0
 
@@ -82,23 +82,23 @@ class Guest(threading.Thread) :
         self.Nickname = NewNick
         self.NickLen = len(self.Nickname)
 
-    def GetAuth(self):
-        while not self.Authenticated :
+    def GetIdentified(self):
+        while not self.Identificated :
             data = self.Client.recv(32) # on recoit x caracteres grand max
             RequeteDuClient = data.decode() #qu'on décode
             RequeteDuClient = str(object=RequeteDuClient)
             if verbose : print("RequeteDuClient : '{}'".format(RequeteDuClient))
 
-            if RequeteDuClient[0:4] == 'AUTH':
+            if RequeteDuClient[0:4] == 'IDTF':
                 ReceivedNickLen = int(RequeteDuClient[4]) #lecture de la longueur du pseudo (doit être <= à 9 char! )
                 if verbose : print("ReceivedNicklen = {}".format(ReceivedNickLen))
                 self.Nickname = RequeteDuClient[5:5+ReceivedNickLen]
 
-                self.Authenticated = True #Le client est désormais identifié
+                self.Identificated = True #Le client est désormais identifié
                 me = (self.Client)
                 NicknameList[self.Nickname] = self.__GuestID #permet à samuel de savoir à quel thread s'adresser en donnant un pseudo
                 print("Historique des clients : {}".format(NicknameList))
-                print("Client {} authentifié !".format(self.Nickname))
+                print("Client {} Identifié !".format(self.Nickname))
 
     def __RequestTreatment(self, Request):
         try:
@@ -114,7 +114,7 @@ class Guest(threading.Thread) :
         self.Message = msg
 
     def __Comm(self,value):
-        ''' Classe chargée de l'envoi & récéption de donnée via le socket une fois le client authentifié.
+        ''' Classe chargée de l'envoi & récéption de donnée via le socket une fois le client Identifié.
         Elle s'occupe de la partie "veille" de la classe Net.
 
         N'est pas concue pour être manipulée par Mes camarades.
@@ -128,16 +128,13 @@ class Guest(threading.Thread) :
                 self.Message = 0
             try:
                 data = self.Client.recv(1024).decode() #le thread reste à l'écoute d'un message pendant la durée renseignée par Timeout
-                if not data: # si on ne recoit plus rien
-                    print(("{} vient de se déconnecter!").format(self.Nickname))
-                    break  # on break la boucle (sinon les bips vont se repeter & la donnée sera traitée à vide)
                 self.__RequestTreatment(data) #on sous-traite les données pour reserver cette fonction aux seuls communications
             except:
-                #en cas de time out on passe simplement à la suite
+                #en cas de time-out on passe simplement à la suite
                 pass
 
     def WhoIsIt(self):
-        '''Fonction retournant le Pseudonyme rensigné par l'utilisateur lors de la phase d'authentification.
+        '''Fonction retournant le Pseudonyme rensigné par l'utilisateur lors de la phase d'Identification.
         Par Joris Placette
         '''
         return self.Nickname
@@ -150,11 +147,11 @@ class Guest(threading.Thread) :
         Par Joris Placette
         '''
         try:
-            self.GetAuth()
+            self.GetIdentified()
         except:
-            print("impossible d'authentifier le client {}".format(self.Address))
+            print("impossible d'Identififier le client {}".format(self.Address))
 
-        if self.Authenticated : self. __Comm(1)
+        if self.Identificated : self. __Comm(1)
 
 class Receptionist (threading.Thread):
     ''' Classe de threading chargée de récéptionner les conncetions des clients.
