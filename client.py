@@ -17,10 +17,6 @@ try :
 except:
     print("Impossible d'importer la bibliothèque time !")
 
-global Sock #devra être accessible dans toutes les classes
-Sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM) # on cree notre socket
-Sock.settimeout(1.0) #timeout crucial pour que le serv abandonne l'écoute toute les 2 secondes pour transmettre le(s) message(s)
-
 class NetThread (threading.Thread) :
     '''Classe-Thread chargé de l'envoi & récéption de donnée via le socket une fois le client identifié.
     Elle s'occupe de la partie "veille" de la classe Net.
@@ -57,6 +53,11 @@ class Net ():
     Par Joris Placette
     '''
     def __init__(self,Host, Port, Nickname, Pass):
+
+        global Sock #devra être accessible dans toutes les classes
+        Sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM) # on cree notre socket
+        Sock.settimeout(1.0) #timeout crucial pour que le serv abandonne l'écoute toute les 2 secondes pour transmettre le(s) message(s)
+
         self.Host = socket.gethostbyname(Host) #récupération de l'adresse auprès des DNS par défaut si nom de domaine fourni
         self.Port = Port
         self.Nickname = Nickname #La Gui indique Pseudo au lieu de Nickname, doit mesurer 10 charactères ou moins

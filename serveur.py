@@ -1,5 +1,5 @@
 # -∗- coding: utf-8 -∗-
-
+#toute l'initiallisation des lib est en try except pour pouvoir dépister instantanément d'éventuels dépendances non satisfaites
 try :
     import socket
     print("Bibliothèque socket importée avec succès !")
@@ -30,14 +30,14 @@ try :
     print("Connection à la base de donnée établie avec succès !")
 except :
     print("Impossible de se connecter à la base de donnée")
-Sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+
+global Host, Port
 Host = '127.0.0.1' # l'ip locale de l'ordinateur
 Port = 8082 # choix d'un port
 
-global MyClient
-MyClient = []
-global NicknameList
-NicknameList = {}
+Sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+Sock.bind((Host,Port))
+
 
 #Fonction intéragissant avec la base de donnée
 
@@ -87,21 +87,9 @@ def printUser(pseudoUtilisateur):#renvoie une list de tuples contenant tous les 
     listPseudo = cur.execute("SELECT pseudo FROM User").fetchall()
     MyClient[NicknameList[pseudoUtilisateur]].transmit(listPseudo)
 
-'''
-La NicknameList est un historique des utilisateurs connectés depuis le lancement.
-Elle permet de savoir à quel thread s'adresser pour envoyer des informations.
 
-Par exemple pour envoyer un message à 'joris' :
-MyClient[NicknameList['joris']].Transmit('Message!')
-
-'''
-global Timeout
-Timeout = 1.0
-global verbose
-verbose = 0 #en cas de besoin il est possible de demander au serveur plus d'informations.
 global Flow
-# on bind notre socket :
-Sock.bind((Host,Port))
+
 
 class ServerNet():
     '''Classe Serveur, sert d'interface entre certains threads et mes collègues
@@ -109,6 +97,26 @@ class ServerNet():
     Par Joris Placette
     '''
     def __init__(self): #initiallisation du thread de reception des nouveaux clients
+        global Timeout
+        Timeout = 1.0
+        global verbose
+        verbose = 0 #en cas de besoin il est possible de demander au serveur plus d'informations.
+
+        global NicknameList
+        NicknameList = {}
+        '''
+        La NicknameList est un historique des utilisateurs connectés depuis le lancement.
+        Elle permet de savoir à quel thread s'adresser pour envoyer des informations.
+
+        Par exemple pour envoyer un message à 'joris' :
+        MyClient[NicknameList['joris']].Transmit('Message!')
+
+        Par Joris Placette
+        '''
+
+        global MyClient
+        MyClient = []
+
         self.ReceptionistThread = Receptionist(1, "ReceptionistThread")
 
 
@@ -211,7 +219,7 @@ class Guest(threading.Thread) :
 
         if self.Identificated : self. __Comm(1)
 
-class Receptionist (threading.Thread):
+class Receptionist(threading.Thread):
     ''' Classe de threading chargée de récéptionner les conncetions des clients.
     concue pour être invoquée en 1 exemplaire par la classe ServerNet.
 
