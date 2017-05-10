@@ -156,7 +156,7 @@ def login():
     global MyNet
     MyNet = Net(Host, Port , Nickname, Pass)
 
-    MyNet.Identify()
+    MyNet.Identify() #séquence d'identification
     if MyNet.Connected == True :
         print("Vous êtes connecté en tant que {}".format(MyNet.WhoAmI()))
         while True:
