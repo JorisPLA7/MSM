@@ -36,10 +36,7 @@ class NetThread (threading.Thread) :
         self.Message = 0
 
     def __RequestTreatment(self, Request):
-        try:
-            exec(Request) # on tente d'executer la chaine de caractères reçus arbitrairement
-        except:
-            print(data)
+        print(Request)
 
     def run(self):
 
@@ -50,7 +47,7 @@ class NetThread (threading.Thread) :
 
             try :
                 data = Sock.recv(1024).decode() #attente d'une reponse pdt 2sec en cas de timeout retourne une erreur, d'ou le try & except
-                __RequestTreatment(data)
+                self.__RequestTreatment(data)
             except:
                 pass #en cas de time-out on passe simplement à la suite
 
