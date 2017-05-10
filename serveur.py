@@ -253,7 +253,7 @@ def Flow(clientID, clientAddress, clientNick, data):
     if type(data) == int :
         requestMessage(data)
 
-    elif type(data) == string :
+    elif type(data) == str :
         verificationPseudo(data)
 
     elif type(data) == list :
