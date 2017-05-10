@@ -6,6 +6,7 @@ fenetre = Tk()          #création de la fenêtre login
 fenetre.wm_title("MSM (login)")
 
 
+
 try :
     import socket
     print("Bibliothèque socket importée avec succès !")
@@ -151,7 +152,6 @@ def login():
     Nickname=pseudo.get()          #récupère le pseudo saisie
     if Nickname!='':        #Vérif qu'il y a un pseudo
         fenetre.destroy() #fermeture fenetre login
-        chate()
     else:
         messagebox.showinfo("ERREUR", "Il semble que votre pseudo ou mot de passe soit incorrect.")
     '''
@@ -167,6 +167,7 @@ def login():
     MyNet = Net(Host, Port , Nickname, Pass)
 
     MyNet.Identify()
+    chate()
     if MyNet.Connected == True :
         print("Vous êtes connecté en tant que {}".format(MyNet.WhoAmI()))
         while True:
@@ -175,14 +176,14 @@ def login():
             
 def envoie():
     global zchat
-    zchat = Entry(chat)
-    zchat.pack(side=LEFT)
     aa=zchat.get()
     nuser1 = LabelFrame(fenetre3, text=Nickname)
     nuser1.pack()
     tuser1 = Label(nuser1, text=aa)
     tuser1.pack()
     zchat.destroy()
+    zchat = Entry(chat)
+    zchat.pack(side=LEFT)
 
 
     
@@ -222,7 +223,7 @@ pseudo = Entry(pseudal)
 pseudo.pack(side = RIGHT)
 
 def chate():
-    global cont2,cont,fenetre3,chat
+    global cont2,cont,fenetre3,chat,zchat
     fenetre3 = Tk()         #création de la fenêtre chat
     fenetre3.wm_title("MSM (chat)")
     contact = Frame(fenetre3)           #creation de sous fenetres toujours pour les meme raisons
