@@ -23,14 +23,14 @@ class NetThread (threading.Thread) :
 
     N'est pas concue pour être manipulée par Mes camarades.
 
-    Voir help(Net())
+    Voir l' help(Net())
 
     Par Joris Placette
     '''
     def __init__(self):
         threading.Thread.__init__(self) #séquence init du thread
         self.Message = 0
-
+        self.thereIsSomeNewData = False # désolé pour la longueur du nom de cette variable je n'ai pas trouvé mieux
     def __RequestTreatment(self, Request):
         print(Request)
 
@@ -43,9 +43,12 @@ class NetThread (threading.Thread) :
 
             try :
                 data = Sock.recv(1024).decode() #attente d'une reponse pdt 2sec en cas de timeout retourne une erreur, d'ou le try & except
-                self.__RequestTreatment(data)
+                self.thereIsSomeNewData = True
             except:
                 pass #en cas de time-out on passe simplement à la suite
+            if self.thereIsSomeNewData:
+                self.__RequestTreatment(data)#J'ai sorti la fonction du try; pour rendre le débuggage possible
+            self.thereIsSomeNewData = False
 
 class Net ():
     '''Classe interactive (API) pour mes camarades, se charge de mettre en forme les interactions client-serveurr pour une utilisation simplifiée des fonctionnallités socket.

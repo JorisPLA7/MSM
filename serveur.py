@@ -98,7 +98,7 @@ class ServerNet():
     '''
     def __init__(self): #initiallisation du thread de reception des nouveaux clients
         global Timeout
-        Timeout = 1.0
+        Timeout = 1.0  #timeout crucial pour que le serv abandonne l'écoute toute les 2 secondes pour transmettre le(s) message(s)
         global verbose
         verbose = 0 #en cas de besoin il est possible de demander au serveur plus d'informations.
 
@@ -110,6 +110,8 @@ class ServerNet():
 
         Par exemple pour envoyer un message à 'joris' :
         MyClient[NicknameList['joris']].Transmit('Message!')
+
+        Quand deux clients s'identifient avec le même pseudonyme alors seul le dernier client connecté aura son ID associé avec le pseudonyme
 
         Par Joris Placette
         '''
@@ -167,10 +169,7 @@ class Guest(threading.Thread) :
                 print("Client {} Identifié !".format(self.Nickname))
 
     def __RequestTreatment(self, Request):
-        try:
-            exec(Request)# on tente d'executer la chaine de caractères reçus arbitrairement
-        except:
-            Flow(self.__GuestID, self.Address, self.Nickname, Request) #sinon on la soumet à la fonction Flow pour Samuel
+        Flow(self.__GuestID, self.Address, self.Nickname, Request) #sinon on la soumet à la fonction Flow pour Samuel
 
     def Transmit(self, msg):
         '''Cette fonction permet à mes camarades d'envoyer du contenu tel qu'une chaine de caractères (un tuple, une image, etc...) au client.
