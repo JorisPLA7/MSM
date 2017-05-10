@@ -20,7 +20,16 @@ try :
     print("Bibliothèque threading.Thread importée avec succès !")
 except:
     print("Impossible d'importer la bibliothèque threading.Thread !")
-
+try :
+    import sqlite3
+    print("Bibliothèque sqlite3 importée avec succès !")
+except:
+    print("Impossible d'importer la bibliothèque sqlite3 !")
+try :
+    con = sqlite3.connect("MSMv0.3")
+    print("Connection à la base de donnée établie avec succès !")
+except :
+    print("Impossible de se connecter à la base de donnée")
 Sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 Host = '127.0.0.1' # l'ip locale de l'ordinateur
 Port = 8082 # choix d'un port
@@ -29,6 +38,55 @@ global MyClient
 MyClient = []
 global NicknameList
 NicknameList = {}
+
+#Fonction intéragissant avec la base de donnée
+
+def writeMessage(contenu,pseudoUtilisateur): #fonction inscrivant un message et le nom de l'utilisateur dans la BDD
+    params = (pseudoUtilisateur,contenu)
+    cur = con.cursor()
+    cur.execute("INSERT INTO Discussions(m_pseudo, m_contenu) VALUES(?, ?)",params)
+    con.commit()
+
+def requestMessage(nbMessage):#récupére le ccontenu et le pseudo des n messages précédents
+    cur = con.cursor()
+    listAll = cur.execute("SELECT * FROM Discussions ORDER BY m_ID DESC LIMIT 0,{}".format(nbMessage)).fetchall()
+    MyClient[NicknameList[pseudoUtilisateur]].transmit(listAll)
+
+def infoUser(pseudoUtilisateur): #récupération des infos d'un utilisateur
+    cur = con.cursor()
+    info = cur.execute("SELECT * FROM User WHERE pseudo=pseudoUtilisateur").fetchall()
+    MyClient[NicknameList[pseudoUtilisateur]].transmit(info)
+
+def userAdd(pseudoUtilisateur):#on ajoute un utilisateur à la BDD
+    cur = con.cursor()
+    cur.execute("INSERT INTO User(pseudo) VALUES(?)",pseudoUtilisateur)
+    con.commit()
+
+def verificationPseudo(pseudoUtilisateur):#vérifie si le pseudo est déja pris,renvoie un booléen
+    i=0
+    verif = False
+    cur = con.cursor()
+    b = cur.execute("SELECT pseudo FROM User ").fetchall()#on récupère une list de tuples
+    for i in b :
+        c = list(i)#on transforme le tuple en list
+        d = str(c[0])#puis en string
+        if pseudoUtilisateur == d :
+            verif = True
+    MyClient[NicknameList[pseudoUtilisateur]].transmit(verif)
+    if verif == True :
+        userAdd(pseudoUtilisateur)
+
+
+def delUser(pseudoUtilisateur):#supprimer un utilisateur par son pseudo
+    cur = con.cursors()
+    cur.execute("DELETE FROM User WHERE pseudo=pseudoUtilisateur")
+    con.commit()
+
+def printUser(pseudoUtilisateur):#renvoie une list de tuples contenant tous les pseudos
+    cur = con.cursor()
+    listPseudo = cur.execute("SELECT pseudo FROM User").fetchall()
+    MyClient[NicknameList[pseudoUtilisateur]].transmit(listPseudo)
+
 '''
 La NicknameList est un historique des utilisateurs connectés depuis le lancement.
 Elle permet de savoir à quel thread s'adresser pour envoyer des informations.
@@ -191,6 +249,15 @@ def Flow(clientID, clientAddress, clientNick, data):
     if broadcast == True:
         for i in range(0,len(MyClient)+1):
             MyClient[i].Transmit(result)
+
+    if type(data) == int :
+        requestMessage(data)
+
+    elif type(data) == string :
+        verificationPseudo(data)
+
+    elif type(data) == list :
+        writeMessage(data[1],data[0])
 
 def SimpleHost():
     '''Fct de démonstration et de test.
