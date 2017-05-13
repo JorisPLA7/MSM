@@ -1,6 +1,6 @@
 # -∗- coding: utf-8 -∗-
 from tkinter import*        #pour l'affichage des fenêtres
-import tkinter.messagebox
+from tkinter import messagebox
 
 fenetre = Tk()          #création de la fenêtre login
 fenetre.wm_title("MSM (login)")
@@ -23,29 +23,22 @@ try :
 except:
     print("Impossible d'importer la bibliothèque time !")
 
-global Sock #devra être accessible dans toutes les classes
-Sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM) # on cree notre socket
-Sock.settimeout(1.0) #timeout crucial pour que le serv abandonne l'écoute toute les 2 secondes pour transmettre le(s) message(s)
-
 class NetThread (threading.Thread) :
     '''Classe-Thread chargé de l'envoi & récéption de donnée via le socket une fois le client identifié.
     Elle s'occupe de la partie "veille" de la classe Net.
 
     N'est pas concue pour être manipulée par Mes camarades.
 
-    Voir help(Net())
+    Voir l' help(Net())
 
     Par Joris Placette
     '''
     def __init__(self):
         threading.Thread.__init__(self) #séquence init du thread
         self.Message = 0
-
+        self.thereIsSomeNewData = False # désolé pour la longueur du nom de cette variable je n'ai pas trouvé mieux
     def __RequestTreatment(self, Request):
-        try:
-            exec(Request) # on tente d'executer la chaine de caractères reçus arbitrairement
-        except:
-            print(Request)
+        Flow(Request)
 
     def run(self):
 
@@ -56,9 +49,12 @@ class NetThread (threading.Thread) :
 
             try :
                 data = Sock.recv(1024).decode() #attente d'une reponse pdt 2sec en cas de timeout retourne une erreur, d'ou le try & except
-                __RequestTreatment(data)
+                self.thereIsSomeNewData = True
             except:
                 pass #en cas de time-out on passe simplement à la suite
+            if self.thereIsSomeNewData:
+                self.__RequestTreatment(data)#J'ai sorti la fonction du try; pour rendre le débuggage possible
+            self.thereIsSomeNewData = False
 
 class Net ():
     '''Classe interactive (API) pour mes camarades, se charge de mettre en forme les interactions client-serveurr pour une utilisation simplifiée des fonctionnallités socket.
@@ -66,6 +62,11 @@ class Net ():
     Par Joris Placette
     '''
     def __init__(self,Host, Port, Nickname, Pass):
+
+        global Sock #devra être accessible dans toutes les classes
+        Sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM) # on cree notre socket
+        Sock.settimeout(1.0) #timeout crucial pour que le serv abandonne l'écoute toute les 2 secondes pour transmettre le(s) message(s)
+
         self.Host = socket.gethostbyname(Host) #récupération de l'adresse auprès des DNS par défaut si nom de domaine fourni
         self.Port = Port
         self.Nickname = Nickname #La Gui indique Pseudo au lieu de Nickname, doit mesurer 10 charactères ou moins
@@ -112,7 +113,6 @@ class Net ():
         print("Disconnected")
 
     def Transmit(self,typed):
-        
         '''Permet de transmettre une chaine de caractères brute au serveur.
 
         /!\ : Pour le moment les messages sont transmis toute les 2sec et non empillés, donc en cas de spam des messages seront perdus :/
@@ -131,8 +131,9 @@ class Net ():
         Par Joris Placette
         '''
         return self.Nickname
-
-
+global Flow
+def Flow(Request):
+    print(Request)
 
 def debug():
     '''Saisir du code en cours de route, ça peut toujours servir... :)
@@ -148,7 +149,7 @@ def debug():
             pass
 
 def login():
-    global Nickname
+    global Nickname,typed
     Nickname=pseudo.get()          #récupère le pseudo saisie
     if Nickname!='':        #Vérif qu'il y a un pseudo
         fenetre.destroy() #fermeture fenetre login
@@ -163,20 +164,22 @@ def login():
     Port = 8082
     Pass = "lol ;')"
 
-    global MyNet
+    global MyNet,yourNet
     MyNet = Net(Host, Port , Nickname, Pass)
 
     MyNet.Identify()
-    chate()
+    MyNet.Transmit(Nickname)
+
     if MyNet.Connected == True :
         print("Vous êtes connecté en tant que {}".format(MyNet.WhoAmI()))
         while True:
             Typed = input(">")
             MyNet.Transmit(Typed)
-            
+
 def envoie():
-    global zchat
+    global zchat,myNet
     aa=zchat.get()
+    msg=lst[Nickname,aa]
     nuser1 = LabelFrame(fenetre3, text=Nickname)
     nuser1.pack()
     tuser1 = Label(nuser1, text=aa)
@@ -184,9 +187,10 @@ def envoie():
     zchat.destroy()
     zchat = Entry(chat)
     zchat.pack(side=LEFT)
+    myNet = Net(msg)
+    myNet.Transmit(msg)
 
 
-    
 def sel():
     test=2
     B=cont2.curselection()
@@ -205,7 +209,7 @@ def sel():
         tuser2 = Label(nuser2, text=bb)
         tuser2.pack()
 
-     
+
 ##titre+bouton
 titre = Label(fenetre, text="MSM", width=30, height=10, anchor=CENTER)
 titre.pack(side=TOP)
@@ -250,9 +254,9 @@ def chate():
 
     benvoie = Button(chat, text ="Envoyer", command=envoie, anchor=CENTER, pady=4, height=1, width=7)
     benvoie.pack(side = RIGHT)
-    
+
     fenetre3.mainloop()
-    
+
 fenetre.resizable(width=False, height=False) #non posibilité de modifier la taille de la fenêtre
 fenetre.mainloop()
 '''
