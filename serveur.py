@@ -38,6 +38,7 @@ Port = 8082 # choix d'un port
 Sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 Sock.bind((Host,Port))
 
+
 #Fonction intéragissant avec la base de donnée
 
 def writeMessage(contenu,pseudoUtilisateur): #fonction inscrivant un message et le nom de l'utilisateur dans la BDD
@@ -225,15 +226,16 @@ class Receptionist(threading.Thread):
 
     Par Joris Placette
     '''
-    def __init__(self, threadID): #initiallisation des variables de l'objet nouvellement crée
-        threading.Thread.__init__(self) #séquence init du thread
+    def __init__(self, threadID, name): #initiallisation des variables de l'objet nouvellement crée
+        threading.Thread.__init__(self)
         self.threadID = threadID
+        self.name = name
 
     def run(self):
         i = 0 # i : thread counter
         while 1:# On est a l'ecoute d'une seule et unique connexion à la fois :
             Sock.listen(5)
-            # Le thread se stoppe ici jusqu'a ce qu'il y ait connexion :
+            # Le script se stoppe ici jusqu'a ce qu'il y ait connexion :
             Client, Address = Sock.accept() # accepte les connexions de l'exterieur
             t = Guest(i, Client, Address)
             MyClient.insert(i, t)
