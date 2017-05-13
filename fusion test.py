@@ -1,6 +1,7 @@
 # -∗- coding: utf-8 -∗-
 from tkinter import*        #pour l'affichage des fenêtres
 from tkinter import messagebox
+import time
 
 fenetre = Tk()          #création de la fenêtre login
 fenetre.wm_title("MSM (login)")
@@ -149,13 +150,10 @@ def debug():
             pass
 
 def login():
-    global Nickname,typed
+    global Nickname,MyNet
     Nickname=pseudo.get()          #récupère le pseudo saisie
     strnick=str(Nickname)
-    if Nickname!='':        #Vérif qu'il y a un pseudo
-        fenetre.destroy() #fermeture fenetre login
-    else:
-        messagebox.showinfo("ERREUR", "Il semble que votre pseudo ou mot de passe soit incorrect.")
+
     '''
     Par Joris Placette
     '''
@@ -165,7 +163,6 @@ def login():
     Port = 8082
     Pass = "lol ;')"
 
-    global MyNet,yourNet
     MyNet = Net(Host, Port , Nickname, Pass)
 
     MyNet.Identify()
@@ -177,10 +174,26 @@ def login():
             Typed = input(">")
             MyNet.Transmit(Typed)
 
+    if Nickname!='':        #Vérif qu'il y a un pseudo
+        fenetre.destroy() #fermeture fenetre login
+        verifpseudo()
+    else:
+        messagebox.showinfo("ERREUR", "Il semble que votre pseudo ou mot de passe soit incorrect.")
+
+def verifpseudo():
+    a=False
+    if a==True:
+        chate()
+    else:
+        messagebox.showinfo("ERREUR","Ce nom d'utilisateur est déjà pris. Relancer l'application.")
+        time.sleep(2)
+        MyNet.Disconnect()
+
+
 def envoie():
-    global zchat,myNet
+    global zchat,msg
     aa=zchat.get()
-    msg=lst[Nickname,aa]
+    messaje=[Nickname,aa]
     nuser1 = LabelFrame(fenetre3, text=Nickname)
     nuser1.pack()
     tuser1 = Label(nuser1, text=aa)
@@ -188,8 +201,7 @@ def envoie():
     zchat.destroy()
     zchat = Entry(chat)
     zchat.pack(side=LEFT)
-    myNet = Net(msg)
-    myNet.Transmit(msg)
+    MyNet.Transmit(messaje)
 
 
 def sel():
