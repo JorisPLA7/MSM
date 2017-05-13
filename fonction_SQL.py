@@ -1,14 +1,11 @@
 import sqlite3
-con = sqlite3.connect("MSMv0.3")
+con = sqlite3.connect("MSMv1.db")
 
 def createUserRegTable(): #fonction créant la table user
     cur = con.cursor()
     cur.execute("""CREATE TABLE User
     (p_ID INTEGER PRIMARY KEY AUTOINCREMENT,
-    pseudo TEXT NOT NULL,
-    droit INTEGER,
-    etatClient BOOLEAN,
-    client TEXT)
+    pseudo TEXT NOT NULL)
     """)
 
 def createDiscussionTable(): #fonction créant la table discusion
@@ -36,7 +33,7 @@ def requestPseudo(nbMessage): #demande les pseudos des n message précédent
     return listPseudos
 
 def requestAll(nbMessage):#récupére le ccontenu et le pseudo des n messages précédents
-    cur con.cursor()
+    cur = con.cursor()
     listAll = cur.execute("SELECT * FROM Discussions ORDER BY m_ID DESC LIMIT 0,{}".format(nbMessage)).fetchall()
     return listAll
 
@@ -70,4 +67,4 @@ def printUser():#renvoie une list de tuples contenant tous les pseudos
     cur = con.cursor()
     listPseudo = cur.execute("SELECT pseudo FROM User").fetchall()
     return listPseudo
-
+createUserRegTable()

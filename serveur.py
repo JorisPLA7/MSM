@@ -26,7 +26,7 @@ try :
 except:
     print("Impossible d'importer la bibliothèque sqlite3 !")
 try :
-    con = sqlite3.connect("MSMv0.3")
+    con = sqlite3.connect("MSMv1.db")
     print("Connection à la base de donnée établie avec succès !")
 except :
     print("Impossible de se connecter à la base de donnée")
@@ -44,7 +44,7 @@ Sock.bind((Host,Port))
 def writeMessage(contenu,pseudoUtilisateur): #fonction inscrivant un message et le nom de l'utilisateur dans la BDD
     params = (pseudoUtilisateur,contenu)
     cur = con.cursor()
-    cur.execute("INSERT INTO Discussions(m_pseudo, m_contenu) VALUES(?, ?)",params)
+    cur.execute("INSERT INTO Discussions(m_pseudo, m_contenu) VALUES (?, ?)",params)
     con.commit()
 
 def requestMessage(nbMessage):#récupére le ccontenu et le pseudo des n messages précédents
@@ -59,7 +59,7 @@ def infoUser(pseudoUtilisateur): #récupération des infos d'un utilisateur
 
 def userAdd(pseudoUtilisateur):#on ajoute un utilisateur à la BDD
     cur = con.cursor()
-    cur.execute("INSERT INTO User(pseudo) VALUES(?)",pseudoUtilisateur)
+    cur.execute("INSERT INTO User(pseudo) VALUES (?)",pseudoUtilisateur)
     con.commit()
 
 def verificationPseudo(pseudoUtilisateur):#vérifie si le pseudo est déja pris,renvoie un booléen
