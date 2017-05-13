@@ -255,6 +255,7 @@ def Flow(clientID, clientAddress, clientNick, data):
     broadcast = True
     result = "-- {} -- {} {} :  {}" .format(clientID, clientNick, clientAddress, data)
     print(result)
+    print(data)
     if broadcast == True:
         for i in range(0,len(MyClient)+1):
             MyClient[i].Transmit(result)
