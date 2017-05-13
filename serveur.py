@@ -248,7 +248,7 @@ def Flow(clientID, clientAddress, clientNick, data):
     Le traitement de ces données est une simple démonstration.
     Cette fonction permettra à Samuel de recevoir et traiter les données émises par les clients.
 
-    pour unvoyer un message à un client précis: MyClient[NicknameList['joris']].Transmit('Message!')
+    pour envoyer un message à un client précis: MyClient[NicknameList['joris']].Transmit('Message!')
 
     Par Joris Placette
     '''
