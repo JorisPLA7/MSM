@@ -32,7 +32,7 @@ class NetThread (threading.Thread) :
         self.Message = 0
         self.thereIsSomeNewData = False # désolé pour la longueur du nom de cette variable je n'ai pas trouvé mieux
     def __RequestTreatment(self, Request):
-        Flow(Request)
+        Flow(Request) #extraction des données pour qu'elles soient récupérées par Arthur
 
     def run(self):
 
@@ -127,6 +127,12 @@ class Net ():
         return self.Nickname
 global Flow
 def Flow(Request):
+    '''Cette fonction est appelée à chaque fois que des données sont recues.
+    Le traitement de ces données est une simple démonstration.
+    Cette fonction permettra à Arthur de recevoir et traiter les données émises par les clients.
+
+    Par Joris Placette
+    '''
     print(Request)
 
 def debug():
