@@ -134,7 +134,8 @@ class Net ():
         return self.Nickname
 global Flow
 def Flow(Request):
-    print(Request)
+    global repflow
+    repflow = Request
 
 def debug():
     '''Saisir du code en cours de route, ça peut toujours servir... :)
@@ -181,8 +182,7 @@ def login():
         messagebox.showinfo("ERREUR", "Il semble que votre pseudo ou mot de passe soit incorrect.")
 
 def verifpseudo():
-    a=False
-    if a==True:
+    if repflow==True:
         chate()
     else:
         messagebox.showinfo("ERREUR","Ce nom d'utilisateur est déjà pris. Relancer l'application.")
