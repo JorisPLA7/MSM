@@ -137,6 +137,9 @@ def Flow(Request):
     global repflow
     repflow = Request
 
+    #Tu peux mettre ici un truc genre verifpseudo() pour que la varible soit testée, la foncion devant bien entenudue être déclenchée apres la récéption des données
+    #en fait que ce soit flow ou une autre déclenchée par Flow, il te faut une fonction qui traite la donnée quand elle arrive
+
 def debug():
     '''Saisir du code en cours de route, ça peut toujours servir... :)
 
