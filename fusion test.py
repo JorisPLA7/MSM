@@ -151,6 +151,7 @@ def debug():
 def login():
     global Nickname,typed
     Nickname=pseudo.get()          #récupère le pseudo saisie
+    strnick=str(Nickname)
     if Nickname!='':        #Vérif qu'il y a un pseudo
         fenetre.destroy() #fermeture fenetre login
     else:
@@ -168,7 +169,7 @@ def login():
     MyNet = Net(Host, Port , Nickname, Pass)
 
     MyNet.Identify()
-    MyNet.Transmit(Nickname)
+    MyNet.Transmit(strnick)
 
     if MyNet.Connected == True :
         print("Vous êtes connecté en tant que {}".format(MyNet.WhoAmI()))
