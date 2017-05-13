@@ -32,7 +32,7 @@ class NetThread (threading.Thread) :
         self.Message = 0
         self.thereIsSomeNewData = False # désolé pour la longueur du nom de cette variable je n'ai pas trouvé mieux
     def __RequestTreatment(self, Request):
-        print(Request)
+        Flow(Request)
 
     def run(self):
 
@@ -125,8 +125,9 @@ class Net ():
         Par Joris Placette
         '''
         return self.Nickname
-
-
+global Flow
+def Flow(Request):
+    print(Request)
 
 def debug():
     '''Saisir du code en cours de route, ça peut toujours servir... :)
@@ -140,6 +141,7 @@ def debug():
             exec(input(">>>")) #sorte d'invite de commande en cas de lancement interactif sur le serveur
         except:
             pass
+
 
 def login():
     '''Fct de démonstration et de test.
