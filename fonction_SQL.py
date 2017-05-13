@@ -55,16 +55,15 @@ def verificationPseudo(pseudoUtilisateur):#vérifie si le pseudo est déja pris,
 
 def UserAdd(pseudoUtilisateur):#on ajoute un utilisateur à la BDD
     cur = con.cursor()
-    cur.execute("INSERT INTO User(pseudo) VALUES(?)",pseudoUtilisateur)
+    cur.execute("INSERT INTO User (pseudo) VALUES (?)", (pseudoUtilisateur,))
     con.commit()
 
 def delUser(pseudoUtilisateur):#supprimer un utilisateur par son pseudo
-    cur = con.cursors()
-    cur.execute("DELETE FROM User WHERE pseudo=pseudoUtilisateur")
+    cur = con.cursor()
+    cur.execute("DELETE FROM User WHERE pseudo = (?)", (pseudoUtilisateur,))
     con.commit()
 
 def printUser():#renvoie une list de tuples contenant tous les pseudos
     cur = con.cursor()
     listPseudo = cur.execute("SELECT pseudo FROM User").fetchall()
     return listPseudo
-createUserRegTable()
