@@ -135,6 +135,8 @@ def Flow(Request):
     '''
     print(Request)
 
+    # variableQuiVautCeQueSamuelAEnvoye = Request
+    # tu peux convertir fastoche avec int(Request) ou tuple(Request) par exemple
 def debug():
     '''Saisir du code en cours de route, ça peut toujours servir... :)
 
