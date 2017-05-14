@@ -1,10 +1,10 @@
 # -∗- coding: utf-8 -∗-
-from tkinter import*        #pour l'affichage des fenêtres
-from tkinter import messagebox
-import time
+from tkinter import*    #pour l'affichage des fenêtres
+from tkinter import messagebox  #pouvoir mettre des messager d'erreur
+import time #pouvoir mettre un minuteur
 
 fenetre = Tk()          #création de la fenêtre login
-fenetre.wm_title("MSM (login)")
+fenetre.wm_title("MSM (login)") #renomme la fenetre
 
 
 
@@ -134,11 +134,14 @@ class Net ():
         return self.Nickname
 global Flow
 def Flow(Request):
-    global repflow
-    repflow = Request
+    global repflow,verifvar,msgre
+    repflow = Request   #repflow prend la veleur que la base de données envoie
+    verifvar = 0
+    if repflow == False:    #si le pseudo est deja utilisé cela modifie la veleur et deconnecte l'utilisateur
+        verifvar = 1
+    if len(repflow)==2: #recupere le string de la base de donné avec le dernier message
+        msgre = 1
 
-    #Tu peux mettre ici un truc genre verifpseudo() pour que la varible soit testée, la foncion devant bien entenudue être déclenchée apres la récéption des données
-    #en fait que ce soit flow ou une autre déclenchée par Flow, il te faut une fonction qui traite la donnée quand elle arrive
 
 def debug():
     '''Saisir du code en cours de route, ça peut toujours servir... :)
@@ -152,79 +155,74 @@ def debug():
             exec(input(">>>")) #sorte d'invite de commande en cas de lancement interactif sur le serveur
         except:
             pass
-
+    '''
+    Par Arthur Duca
+    '''
 def login():
-    global Nickname,MyNet
-    Nickname=pseudo.get()          #récupère le pseudo saisie
-    strnick=str(Nickname)
-
+    global Nickname,MyNet,strnick
+    Nickname = pseudo.get()          #récupère le pseudo saisie
+    strnick = str(Nickname) #preparation du message a envoyer a la base de données
     '''
     Par Joris Placette
     '''
-    Host = "0"
-    if Host == "0":
-            Host ="127.0.0.1"
+    Host ="127.0.0.1"
     Port = 8082
     Pass = "lol ;')"
 
     MyNet = Net(Host, Port , Nickname, Pass)
-
     MyNet.Identify()
-    MyNet.Transmit(strnick)
-
+    '''
+    Par Joris Placette
+    '''
     if MyNet.Connected == True :
         print("Vous êtes connecté en tant que {}".format(MyNet.WhoAmI()))
+        if Nickname!='':        #Vérif qu'il y a un pseudo
+            fenetre.destroy() #fermeture fenetre login
+            verifpseudo()   #verifie avec la base de donnée si le pseudo est déja pris
+        elif Nickname=='':
+            messagebox.showinfo("ERREUR", "Il semble que votre pseudo ou mot de passe soit incorrect.") #message d'errueur si l'utilisateur n'a pas rentré de pseudo
         while True:
             Typed = input(">")
             MyNet.Transmit(Typed)
-
-    if Nickname!='':        #Vérif qu'il y a un pseudo
-        fenetre.destroy() #fermeture fenetre login
-        verifpseudo()
+    '''
+    Par Arthur Duca
+    '''
+def verifpseudo():  #fonction qui vérifie avec la base de données si le psudo est valide
+    global verifvar
+    MyNet.Transmit(strnick) #envoie du sting definit plus haut a la base de données
+    time.sleep(5)   #attente de reponse
+    if verifvar==0:
+        chate() #ouvre la fenetre suivante
     else:
-        messagebox.showinfo("ERREUR", "Il semble que votre pseudo ou mot de passe soit incorrect.")
-
-def verifpseudo():
-    if repflow==True:
-        chate()
-    else:
-        messagebox.showinfo("ERREUR","Ce nom d'utilisateur est déjà pris. Relancer l'application.")
+        messagebox.showinfo("ERREUR","Ce nom d'utilisateur est déjà pris. Relancer l'application.") #message d'erreur si le pseudo est deja pris
         time.sleep(2)
-        MyNet.Disconnect()
+        MyNet.Disconnect()  #deconnexion de l'utilisateur
 
 
 def envoie():
-    global zchat,msg
-    aa=zchat.get()
-    messaje=[Nickname,aa]
-    nuser1 = LabelFrame(fenetre3, text=Nickname)
+    global zchat,messaje,messagetap
+    messagetap=zchat.get()  #recuperation du message ecrit dans la case
+    messaje=[Nickname,messagetap]   #creation d'une liste avec pseudo est message pour la base de données
+    MyNet.Transmit(messaje) #envoie de la liste a la base de données
+    nuser1 = LabelFrame(fenetre3, text=Nickname)    #création de la fenetre avec le nom d'utilisateur
     nuser1.pack()
-    tuser1 = Label(nuser1, text=aa)
+    tuser1 = Label(nuser1, text=messagetap) #insertion dans la fenetre du texte ecrit par l'utilisateur
     tuser1.pack()
-    zchat.destroy()
+    zchat.destroy() #efface la case avec le message et la recrees
     zchat = Entry(chat)
     zchat.pack(side=LEFT)
-    MyNet.Transmit(messaje)
-
 
 def sel():
-    test=2
-    B=cont2.curselection()
-    C=cont[B[0]]
-    aa="COUCOU !!!!"
-    bb="COUCOUx !!!!"
-
-    if test==1:
-        nuser1 = LabelFrame(fenetre3, text=Nickname)
+    global MyNet
+    B=cont2.curselection()  #recupere l'information du nom selectionné
+    psdsel=cont[B[0]]    #Nom de la personne selectionné
+    MyNet.Transmit(1)   #envoie le nombre de message desireux a la base de données
+    time.sleep(5)   #attends une reponse de la base de données
+    if msgre==1:    #crée une fenetre avec le dernier message de la personne selectionné
+        nuser1 = LabelFrame(fenetre3, text=C)
         nuser1.pack()
-        tuser1 = Label(nuser1, text=aa)
+        tuser1 = Label(nuser1, text=messagetap)
         tuser1.pack()
-    if test==2:
-        nuser2 = LabelFrame(fenetre3, text=C)
-        nuser2.pack()
-        tuser2 = Label(nuser2, text=bb)
-        tuser2.pack()
-
 
 ##titre+bouton
 titre = Label(fenetre, text="MSM", width=30, height=10, anchor=CENTER)
@@ -237,45 +235,41 @@ bgo.pack(side = BOTTOM)
 ##pseudo
 pseudal = Frame(fenetre) #Création de fenetre dans une fenetre pour une meilleure presentation
 pseudal.pack()
-psn = Label(pseudal, text="Pseudo:", pady=4)
+psn = Label(pseudal, text="Pseudo:", pady=4)   #Création et positionnement du mot "pseudo"
 psn.pack(side = LEFT)
-pseudo = Entry(pseudal)
+pseudo = Entry(pseudal)   #Création et positionnement d'une zone pour la sasie du pseudo
 pseudo.pack(side = RIGHT)
 
-def chate():
+def chate(): #nouvelle fenetre avec le chat
     global cont2,cont,fenetre3,chat,zchat
-    fenetre3 = Tk()         #création de la fenêtre chat
-    fenetre3.wm_title("MSM (chat)")
-    contact = Frame(fenetre3)           #creation de sous fenetres toujours pour les meme raisons
+    fenetre3 = Tk() #création de la fenêtre chat
+    fenetre3.wm_title("MSM (chat)") #renomme la fenetre de chat
+    contact = Frame(fenetre3)   #creation de sous fenetres pour un positionnement plus simple
     contact.pack(side=LEFT)
-    chat = Frame(fenetre3)
+    chat = Frame(fenetre3)  #creation de sous fenetres pour un positionnement plus simple
     chat.pack(side=BOTTOM)
 ##CONTACT
-    scrollbar = Scrollbar(contact)
+    scrollbar = Scrollbar(contact)   #Création et positionnement de la scrollbar
     scrollbar.pack( side = RIGHT, fill=Y)
     cont2 = Listbox(contact, yscrollcommand = scrollbar.set, height=30, width=30)
     cont=['Arthur','Samuel','Joris']
 
-    for i in range(len(cont)):
+    for i in range(len(cont)):  #insertion des utilisateurs de la liste cont dans la listbox
         cont2.insert(END, cont[i])
 
     cont2.pack(side=TOP, fill=Y)
-    scrollbar.config( command = cont2.yview)
+    scrollbar.config( command = cont2.yview)   #orientation de la scroll bar
 
-    bsel = Button(contact, text ="sélectionner", command = sel, anchor=CENTER, pady=4, height=1, width=16)
+    bsel = Button(contact, text ="sélectionner", command = sel, anchor=CENTER, pady=4, height=1, width=16)   #Création et positionnement du bouton pour selectionne un utilisateur
     bsel.pack(side = BOTTOM, fill=X)
 
-    zchat = Entry(chat)
+    zchat = Entry(chat)   #Création et positionnement de la zone de chat
     zchat.pack(side=LEFT)
 
-    benvoie = Button(chat, text ="Envoyer", command=envoie, anchor=CENTER, pady=4, height=1, width=7)
+    benvoie = Button(chat, text ="Envoyer", command=envoie, anchor=CENTER, pady=4, height=1, width=7)   #Création et positionnement d'un bouton pour envoyer du texte
     benvoie.pack(side = RIGHT)
 
     fenetre3.mainloop()
 
 fenetre.resizable(width=False, height=False) #non posibilité de modifier la taille de la fenêtre
 fenetre.mainloop()
-'''
-if __name__ == '__main__':
-    login() # ce fichier sera peut-être une librairie, il faut donc empêcher l'inclusion du login si appelée par un autre fichier.
-'''
