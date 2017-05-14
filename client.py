@@ -69,7 +69,7 @@ class Net ():
         self.Pass = Pass #le pas ne sert pas durant la phase d'identification du client, j'ai cependant implanté cette variable si mes camarades en ont besoin
         self.Connected = False
         self.__NetThread = NetThread()
-        self.__NetThread.start() #Démarrage du thread chargé d'éccouter et de shipper les messages
+        self.__NetThread.start() #Démarrage du thread chargé d'écouter et de transmettre les données
 
     def Identify(self):
         '''Envoie une requette d'identification.

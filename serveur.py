@@ -145,7 +145,7 @@ class Guest(threading.Thread) :
         self.IdentificationThread = 0
         self.DoComm = 0
         self.Message = []
-
+        self.thereIsSomeNewData = False
 
     def SetNickname(self, NewNick):
         self.Nickname = NewNick
@@ -162,10 +162,8 @@ class Guest(threading.Thread) :
                 ReceivedNickLen = int(RequeteDuClient[4]) #lecture de la longueur du pseudo (doit être <= à 9 char! )
                 if verbose : print("ReceivedNicklen = {}".format(ReceivedNickLen))
                 self.Nickname = RequeteDuClient[5:5+ReceivedNickLen]
-
                 self.Identificated = True #Le client est désormais identifié
-                me = (self.Client)
-                NicknameList[self.Nickname] = self.__GuestID #permet à samuel de savoir à quel thread s'adresser en donnant un pseudo
+                NicknameList[self.Nickname] = self.__GuestID #permet à Samuel de savoir à quel thread s'adresser en donnant un pseudo
                 print("Historique des clients : {}".format(NicknameList))
                 print("Client {} Identifié !".format(self.Nickname))
 
@@ -194,11 +192,13 @@ class Guest(threading.Thread) :
                 self.Client.sendall(data.encode()) #sendall permet de s'assurer que le message arrive EN ENTIER
             try:
                 data = self.Client.recv(1024).decode() #le thread reste à l'écoute d'un message pendant la durée renseignée par Timeout
-                self.__RequestTreatment(data) #on sous-traite les données pour reserver cette fonction aux seuls communications
+                self.thereIsSomeNewData = True
             except:
                 #en cas de time-out on passe simplement à la suite
                 pass
-
+            if self.thereIsSomeNewData:
+                self.__RequestTreatment(data)#J'ai sorti la fonction du try; pour rendre le débuggage possible
+            self.thereIsSomeNewData = False
     def WhoIsIt(self):
         '''Fonction retournant le Pseudonyme rensigné par l'utilisateur lors de la phase d'Identification.
         Par Joris Placette
@@ -220,7 +220,7 @@ class Guest(threading.Thread) :
         if self.Identificated : self. __Comm(1)
 
 class Receptionist(threading.Thread):
-    ''' Classe de threading chargée de récéptionner les conncetions des clients.
+    ''' Classe de threading chargée de réceptioner les connexions des clients.
     concue pour être invoquée en 1 exemplaire par la classe ServerNet.
 
     N'est pas concue pour être manipulée par Mes camarades.
@@ -234,13 +234,13 @@ class Receptionist(threading.Thread):
 
     def run(self):
         i = 0 # i : thread counter
-        while 1:# On est a l'ecoute d'une seule et unique connexion à la fois :
-            Sock.listen(5)
+        while 1:
+            Sock.listen(5) # On est a l'ecoute d'une seule et unique connexion à la fois
             # Le script se stoppe ici jusqu'a ce qu'il y ait connexion :
             Client, Address = Sock.accept() # accepte les connexions de l'exterieur
-            t = Guest(i, Client, Address)
-            MyClient.insert(i, t)
-            MyClient[i].start()
+            t = Guest(i, Client, Address) #On crée le thread à partir de la classe Guest
+            MyClient.insert(i, t) #on ajoute le thread client à la liste
+            MyClient[i].start() #on lance le thread client
             i+=1
 
 
@@ -259,7 +259,9 @@ def Flow(clientID, clientAddress, clientNick, data):
     print(data)
     if broadcast == True:
         for i in range(0,len(MyClient)+1):
-            MyClient[i].Transmit(result)
+            MyClient[i-1].Transmit(result)
+    '''
+    ##CE CODE IMPLANTE PAR SAMUEL FAIT PLANTER LE SERVEUR EN L'ETAT, DONC JE L'AI RETIRE
 
     if type(data) == int :
         requestMessage(data)
@@ -269,6 +271,7 @@ def Flow(clientID, clientAddress, clientNick, data):
 
     elif type(data) == list :
         writeMessage(data[1],data[0])
+    '''
 
 def SimpleHost():
     '''Fct de démonstration et de test.
