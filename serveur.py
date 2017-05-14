@@ -144,7 +144,7 @@ class Guest(threading.Thread) :
         self.NickLen = None
         self.IdentificationThread = 0
         self.DoComm = 0
-        self.Message = 0
+        self.Message = []
 
 
     def SetNickname(self, NewNick):
@@ -177,7 +177,7 @@ class Guest(threading.Thread) :
 
         Par Joris Placette
         '''
-        self.Message = msg
+        self.Message.append(msg)
 
     def __Comm(self,value):
         ''' Classe chargée de l'envoi & récéption de donnée via le socket une fois le client Identifié.
@@ -189,9 +189,9 @@ class Guest(threading.Thread) :
         '''
         self.DoComm = value #variable permettant de stopper les échanges
         while self.DoComm == 1:
-            if self.Message != 0: #si un message a été ajouté depuis la dernière fois
-                self.Client.sendall(self.Message.encode()) #sendall permet de s'assurer que le message arrive EN ENTIER
-                self.Message = 0
+            if len(self.Message) >= 1: #si un message a été ajouté depuis la dernière fois
+                data = self.Message.pop()
+                self.Client.sendall(data.encode()) #sendall permet de s'assurer que le message arrive EN ENTIER
             try:
                 data = self.Client.recv(1024).decode() #le thread reste à l'écoute d'un message pendant la durée renseignée par Timeout
                 self.__RequestTreatment(data) #on sous-traite les données pour reserver cette fonction aux seuls communications

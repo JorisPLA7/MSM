@@ -29,7 +29,7 @@ class NetThread (threading.Thread) :
     '''
     def __init__(self):
         threading.Thread.__init__(self) #séquence init du thread
-        self.Message = 0
+        self.Message = []
         self.thereIsSomeNewData = False # désolé pour la longueur du nom de cette variable je n'ai pas trouvé mieux
     def __RequestTreatment(self, Request):
         Flow(Request) #extraction des données pour qu'elles soient récupérées par Arthur
@@ -37,9 +37,10 @@ class NetThread (threading.Thread) :
     def run(self):
 
         while 1:
-            if self.Message != 0:
-                Sock.sendall(self.Message.encode()) #envoi du message ss forme de bytecode
-                self.Message = 0
+            if len(self.Message) >= 1: #si un message a été ajouté depuis la dernière fois
+                data = self.Message.pop()
+                Sock.sendall(data.encode()) #envoi du message ss forme de bytecode
+
 
             try :
                 data = Sock.recv(1024).decode() #attente d'une reponse pdt 2sec en cas de timeout retourne une erreur, d'ou le try & except
@@ -117,7 +118,7 @@ class Net ():
 
         Par Joris Placette
         '''
-        self.__NetThread.Message = typed #transmett la chaine au thread, on n'execute pas de fonction sinon il faut attentdre la fin de celle-ci , on se contente donc de transmettre la donnée.
+        self.__NetThread.Message.append(typed) #transmett la chaine au thread, on n'execute pas de fonction sinon il faut attentdre la fin de celle-ci , on se contente donc de transmettre la donnée.
 
     def WhoAmI(self):
         '''Renvoie le Pseudonyme déclaré au serveur lors de l'__init__()
