@@ -34,7 +34,7 @@ def requestPseudo(nbMessage): #demande les pseudos des n message précédent
 
 def requestAll(nbMessage):#récupére le ccontenu et le pseudo des n messages précédents
     cur = con.cursor()
-    listAll = cur.execute("SELECT * FROM Discussions ORDER BY m_ID DESC LIMIT 0,{}".format(nbMessage)).fetchall()
+    listAll = cur.execute("SELECT m_contenu,m_pseudo FROM Discussions ORDER BY m_ID DESC LIMIT 0,{}".format(nbMessage)).fetchall()
     return listAll
 
 def infoUser(pseudoUtilisateur): #récupération des infos d'un utilisateur
@@ -44,14 +44,18 @@ def infoUser(pseudoUtilisateur): #récupération des infos d'un utilisateur
 
 def verificationPseudo(pseudoUtilisateur):#vérifie si le pseudo est déja pris,renvoie un booléen
     i=0
+    verif = False
     cur = con.cursor()
     b = cur.execute("SELECT pseudo FROM User ").fetchall()#on récupère une list de tuples
     for i in b :
         c = list(i)#on transforme le tuple en list
         d = str(c[0])#puis en string
         if pseudoUtilisateur == d :
-            return True
-    return False
+            verif = True
+            return verif
+    #if verif == False :
+        #userAdd(pseudoUtilisateur)
+    return verif
 
 def userAdd(pseudoUtilisateur):#on ajoute un utilisateur à la BDD
     cur = con.cursor()
@@ -68,7 +72,5 @@ def printUser():#renvoie une list de tuples contenant tous les pseudos
     listPseudo = cur.execute("SELECT pseudo FROM User").fetchall()
     return listPseudo
 
-userAdd("Samuel")
-userAdd("Joris")
-userAdd("Arthur")
-userAdd("Mr_Meilland")
+a = verificationPseudo("Gandalf")
+print(a)

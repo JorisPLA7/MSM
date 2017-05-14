@@ -47,7 +47,7 @@ def writeMessage(contenu,pseudoUtilisateur): #fonction inscrivant un message et 
     cur.execute("INSERT INTO Discussions(m_pseudo, m_contenu) VALUES (?, ?)",params)
     con.commit()
 
-def requestMessage(nbMessage):#récupére le ccontenu et le pseudo des n messages précédents
+def requestMessage(nbMessage,pseudoUtilisateur):#récupére le ccontenu et le pseudo des n messages précédents
     cur = con.cursor()
     listAll = cur.execute("SELECT * FROM Discussions ORDER BY m_ID DESC LIMIT 0,{}".format(nbMessage)).fetchall()
     MyClient[NicknameList[pseudoUtilisateur]].transmit(listAll)
@@ -57,7 +57,7 @@ def infoUser(pseudoUtilisateur): #récupération des infos d'un utilisateur
     info = cur.execute("SELECT * FROM User WHERE pseudo=pseudoUtilisateur").fetchall()
     MyClient[NicknameList[pseudoUtilisateur]].transmit(info)
 
-def UserAdd(pseudoUtilisateur):#on ajoute un utilisateur à la BDD
+def userAdd(pseudoUtilisateur):#on ajoute un utilisateur à la BDD
     cur = con.cursor()
     cur.execute("INSERT INTO User (pseudo) VALUES (?)", (pseudoUtilisateur,))
     con.commit()
@@ -73,9 +73,10 @@ def verificationPseudo(pseudoUtilisateur):#vérifie si le pseudo est déja pris,
         d = str(c[0])#puis en string
         if pseudoUtilisateur == d :
             verif = True
-    MyClient[NicknameList[pseudoUtilisateur]].transmit(verif)
-    if verif == True :
-        userAdd(pseudoUtilisateur)
+            #MyClient[NicknameList[pseudoUtilisateur]].transmit(verif)
+            return verif
+    #MyClient[NicknameList[pseudoUtilisateur]].transmit(verif)
+    return verif
 
 
 def delUser(pseudoUtilisateur):#supprimer un utilisateur par son pseudo
@@ -243,7 +244,6 @@ class Receptionist(threading.Thread):
             MyClient[i].start()
             i+=1
 
-
 def Flow(clientID, clientAddress, clientNick, data):
     '''Cette fonction est appelée à chaque fois que des données sont recues.
     Le traitement de ces données est une simple démonstration.
@@ -256,18 +256,20 @@ def Flow(clientID, clientAddress, clientNick, data):
     broadcast = True
     result = "-- {} -- {} {} :  {}" .format(clientID, clientNick, clientAddress, data)
     print(result)
-    print(data)
-    if broadcast == True:
+    '''if broadcast == True:
         for i in range(0,len(MyClient)+1):
-            MyClient[i].Transmit(result)
+            MyClient[i].Transmit(result)'''
 
-    if type(data) == int :
-        requestMessage(data)
+    if isinstance(data, str) == True:
+        a = verificationPseudo(data)
+        print(a)
+        if a == False :
+            userAdd(data)
 
-    elif type(data) == str :
-        verificationPseudo(data)
+    elif isinstance(data, int) == True :
+        requestMessage(data,clientNick)
 
-    elif type(data) == list :
+    elif isinstance(data, list) == True :
         writeMessage(data[1],data[0])
 
 def SimpleHost():
