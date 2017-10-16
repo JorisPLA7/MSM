@@ -31,7 +31,8 @@ try :
 except :
     print("Impossible de se connecter à la base de donnée")
 
-global Host, Port
+global Host, Port, broadcast
+broadcast = True
 Host = '127.0.0.1' # l'ip locale de l'ordinateur
 Port = 8082 # choix d'un port
 
@@ -240,7 +241,7 @@ class Receptionist(threading.Thread):
             # Le script se stoppe ici jusqu'a ce qu'il y ait connexion :
             Client, Address = Sock.accept() # accepte les connexions de l'exterieur
             t = Guest(i, Client, Address)
-            MyClient.insert(i, t)
+            MyClient.insert(i, t) #c'est moche mais onn y touche plus
             MyClient[i].start()
             i+=1
 
@@ -253,12 +254,12 @@ def Flow(clientID, clientAddress, clientNick, data):
 
     Par Joris Placette
     '''
-    broadcast = True
     result = "-- {} -- {} {} :  {}" .format(clientID, clientNick, clientAddress, data)
     print(result)
-    '''if broadcast == True:
+
+    if broadcast == True:
         for i in range(0,len(MyClient)+1):
-            MyClient[i].Transmit(result)'''
+            MyClient[i].Transmit(result)
 
     if isinstance(data, str) == True:
         a = verificationPseudo(data)
