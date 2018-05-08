@@ -1,5 +1,4 @@
-# MSM
-Most Secure Messaging
+# Minimal Scripted Messaging
 
 fonctionnalités à ajouter
   échange bilatéral
@@ -7,9 +6,9 @@ fonctionnalités à ajouter
 
 print(MyServ.ListClients())
 
-préfixes comm:
-  AUTH authentification
-  BROA broadcast
-  EXEC Execute
-  MNGE manage utilisateur
-  MSGE
+## préfixes comm:
+  - AUTH authentification
+  - BROA broadcast
+  - EXEC Execute
+  - MNGE manage utilisateur
+  - MSGE
