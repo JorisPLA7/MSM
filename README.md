@@ -1,5 +1,7 @@
 # Minimal Scripted Messaging
 
+<strong>Qualité du code : Horrible.</strong> Vous êtes prévenus...
+
 fonctionnalités à ajouter
   échange bilatéral
   traitement séparé données reçues
